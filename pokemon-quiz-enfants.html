@@ -860,6 +860,61 @@
             background: #dd6b20;
         }
 
+        /* Styles pour le système d'onglets */
+        .tabs-container {
+            background: #e8e8e8;
+            padding: 10px 10px 0 10px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: #d0d0d0;
+            color: #666;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', Arial;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: #c0c0c0;
+            color: #333;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #333;
+            transform: translateY(3px);
+        }
+
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
         .music-control {
             position: fixed;
             bottom: 20px;
@@ -1120,40 +1175,29 @@
 
         <!-- ÉCRAN DE CONFIGURATION -->
         <div class="config-screen hidden" id="configScreen">
-            <div class="instruction-box" id="instructionBox" style="display: none;">
-                <h3>📖 Comment jouer ?</h3>
-                <div class="instruction-step">
-                    <div class="step-number">1</div>
-                    <div>Regarde l'image du Pokémon à l'écran</div>
-                </div>
-                <div class="instruction-step">
-                    <div class="step-number">2</div>
-                    <div>Si tu veux un indice, clique sur "Voir les types"</div>
-                </div>
-                <div class="instruction-step">
-                    <div class="step-number">3</div>
-                    <div>Cherche dans ton Pokédex (livre) pour trouver son nom</div>
-                </div>
-                <div class="instruction-step">
-                    <div class="step-number">4</div>
-                    <div>Écris son nom dans la case et valide !</div>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
-                <button class="btn-secondary" id="viewCollectionBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+            <!-- Système d'onglets -->
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="newgame" id="newGameTab">
+                    🚀 Nouvelle partie
+                </button>
+                <button class="tab-button" data-tab="collection" id="collectionTab">
                     📚 Voir ma collection
                 </button>
-                <button class="btn-secondary" id="viewBadgesBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                <button class="tab-button" data-tab="badges" id="badgesTab">
                     🏆 Mes badges
                 </button>
-                <button class="btn-warning" id="toggleInstructionsBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                <button class="tab-button" data-tab="howto" id="howtoTab">
                     ❓ Comment jouer ?
                 </button>
-                <button class="btn-danger" id="changePlayerBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                <button class="tab-button" data-tab="changeplayer" id="changePlayerTab">
                     👤 Changer de joueur
                 </button>
             </div>
+
+            <!-- Contenu des onglets -->
+            <div class="tab-content">
+                <!-- Onglet Nouvelle partie -->
+                <div class="tab-panel active" id="panel-newgame">
 
             <div class="filters">
                 <div class="filter-row">
@@ -1220,6 +1264,51 @@
             </div>
 
             <button class="big-start-button" id="startBtn">🚀 Commencer la partie !</button>
+                </div>  <!-- Fin panel newgame -->
+
+                <!-- Onglet Collection (contenu chargé dynamiquement) -->
+                <div class="tab-panel" id="panel-collection">
+                    <!-- Le contenu de la collection s'affichera ici -->
+                </div>
+
+                <!-- Onglet Badges (contenu chargé dynamiquement) -->
+                <div class="tab-panel" id="panel-badges">
+                    <!-- Le contenu des badges s'affichera ici -->
+                </div>
+
+                <!-- Onglet Comment jouer -->
+                <div class="tab-panel" id="panel-howto">
+                    <div class="instruction-box" style="display: block;">
+                        <h3>📖 Comment jouer ?</h3>
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div>Regarde l'image du Pokémon à l'écran</div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div>Si tu veux un indice, clique sur "Voir les types"</div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div>Cherche dans ton Pokédex (livre) pour trouver son nom</div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div>Écris son nom dans la case et valide !</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet Changer de joueur (contenu sera géré par JS) -->
+                <div class="tab-panel" id="panel-changeplayer">
+                    <div style="text-align: center; padding: 40px;">
+                        <h3 style="margin-bottom: 20px;">👤 Changer de joueur</h3>
+                        <button class="big-start-button" id="confirmChangePlayerBtn">
+                            Retourner à la sélection
+                        </button>
+                    </div>
+                </div>
+            </div>  <!-- Fin tab-content -->
         </div>
 
         <!-- ÉCRAN DE JEU -->
@@ -1403,13 +1492,13 @@
         const helpButton = document.getElementById('helpButton');
         const playerNameInput = document.getElementById('playerName');
         const selectPlayerBtn = document.getElementById('selectPlayerBtn');
-        const viewCollectionBtn = document.getElementById('viewCollectionBtn');
-        const viewBadgesBtn = document.getElementById('viewBadgesBtn');
+        // const viewCollectionBtn = document.getElementById('viewCollectionBtn'); // Remplacé par système d'onglets
+        // const viewBadgesBtn = document.getElementById('viewBadgesBtn'); // Remplacé par système d'onglets
         const backFromCollectionBtn = document.getElementById('backFromCollectionBtn');
         const backFromBadgesBtn = document.getElementById('backFromBadgesBtn');
         const backFromBadgeDetailBtn = document.getElementById('backFromBadgeDetailBtn');
-        const changePlayerBtn = document.getElementById('changePlayerBtn');
-        const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+        // const changePlayerBtn = document.getElementById('changePlayerBtn'); // Remplacé par système d'onglets
+        // const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn'); // Remplacé par système d'onglets
         const instructionBox = document.getElementById('instructionBox');
         const musicControl = document.getElementById('musicControl');
         
@@ -1652,15 +1741,6 @@
         musicControl.classList.add('playing');
 
         // Bouton toggle instructions
-        toggleInstructionsBtn.addEventListener('click', () => {
-            if (instructionBox.style.display === 'none') {
-                instructionBox.style.display = 'block';
-                toggleInstructionsBtn.textContent = '✖️ Masquer les règles';
-            } else {
-                instructionBox.style.display = 'none';
-                toggleInstructionsBtn.textContent = '❓ Comment jouer ?';
-            }
-        });
 
         // Afficher la collection du joueur
         function showCollection(selectedGen = 'all') {
@@ -2064,30 +2144,230 @@
             showCollection(gen);
         });
 
+        
+        // =====================================
+        // GESTION DES ONGLETS
+        // =====================================
+        
+        // Fonction pour changer d'onglet
+        function switchTab(tabName) {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Cacher tous les panneaux
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Activer l'onglet et le panneau sélectionnés
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            const activePanel = document.getElementById(`panel-${tabName}`);
+            
+            if (activeButton && activePanel) {
+                activeButton.classList.add('active');
+                activePanel.classList.add('active');
+            }
+        }
+        
+        // Fonction d'initialisation des onglets
+        function initializeTabs() {
+            // Ajouter les event listeners sur les onglets
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const tabName = e.currentTarget.getAttribute('data-tab');
+                    
+                    // Pour l'onglet collection, charger la collection
+                    if (tabName === 'collection') {
+                        switchTab('collection');
+                        loadCollectionInTab();
+                    }
+                    // Pour l'onglet badges, charger les badges
+                    else if (tabName === 'badges') {
+                        switchTab('badges');
+                        loadBadgesInTab();
+                    }
+                    // Pour les autres onglets, simplement changer
+                    else {
+                        switchTab(tabName);
+                    }
+                });
+            });
+            
+            // Initialiser l'onglet "Nouvelle partie" comme actif
+            switchTab('newgame');
+        }
+        
+        // Fonction pour charger la collection dans l'onglet
+        function loadCollectionInTab() {
+            const panel = document.getElementById('panel-collection');
+            
+            if (!currentPlayer) {
+                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucun joueur sélectionné</div>';
+                return;
+            }
+            
+            const data = playerData[currentPlayer];
+            if (!data) {
+                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucune donnée disponible</div>';
+                return;
+            }
+            
+            const totalPokemon = 649;
+            const collectedCount = data.collection.length;
+            const percentage = Math.round((collectedCount / totalPokemon) * 100);
+            
+            // Créer le HTML de la collection
+            let html = `
+                <div class="collection-header">
+                    <h2>📚 Ma Collection Pokémon</h2>
+                    <div class="collection-stats">
+                        <span>🎯 <strong>${collectedCount}</strong>/${totalPokemon} capturés</span>
+                        <span>📊 <strong>${percentage}%</strong></span>
+                    </div>
+                </div>
+                
+                <div class="generation-tabs" id="generationTabsInTab">
+                    <button class="gen-tab active" data-gen="all">
+                        Toutes<span class="count">${collectedCount}/${totalPokemon}</span>
+                    </button>
+            `;
+            
+            // Ajouter les onglets de génération
+            for (let gen = 1; gen <= 5; gen++) {
+                const genStart = gen === 1 ? 1 : (gen === 2 ? 152 : (gen === 3 ? 252 : (gen === 4 ? 387 : 494)));
+                const genEnd = gen === 1 ? 151 : (gen === 2 ? 251 : (gen === 3 ? 386 : (gen === 4 ? 493 : 649)));
+                const genCount = data.collection.filter(num => num >= genStart && num <= genEnd).length;
+                const genTotal = genEnd - genStart + 1;
+                
+                html += `
+                    <button class="gen-tab" data-gen="${gen}">
+                        Gen ${gen}<span class="count">${genCount}/${genTotal}</span>
+                    </button>
+                `;
+            }
+            
+            html += '</div><div id="collectionGridInTab"></div>';
+            
+            panel.innerHTML = html;
+            
+            // Ajouter les event listeners sur les onglets de génération
+            document.querySelectorAll('#generationTabsInTab .gen-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('#generationTabsInTab .gen-tab').forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    const gen = e.currentTarget.getAttribute('data-gen');
+                    displayCollectionGenInTab(gen);
+                });
+            });
+            
+            // Afficher toute la collection par défaut
+            displayCollectionGenInTab('all');
+        }
+        
+        // Fonction pour afficher une génération spécifique dans l'onglet
+        function displayCollectionGenInTab(gen) {
+            const grid = document.getElementById('collectionGridInTab');
+            if (!grid || !currentPlayer) return;
+            
+            const data = playerData[currentPlayer];
+            if (!data) return;
+            
+            let pokemonToShow = allPokemon;
+            
+            if (gen !== 'all') {
+                const genNum = parseInt(gen);
+                const genStart = genNum === 1 ? 1 : (genNum === 2 ? 152 : (genNum === 3 ? 252 : (genNum === 4 ? 387 : 494)));
+                const genEnd = genNum === 1 ? 151 : (genNum === 2 ? 251 : (genNum === 3 ? 386 : (genNum === 4 ? 493 : 649)));
+                pokemonToShow = allPokemon.filter(p => p.num >= genStart && p.num <= genEnd);
+            }
+            
+            let html = '<div class="collection-grid">';
+            
+            for (const pokemon of pokemonToShow) {
+                const isCollected = data.collection.includes(pokemon.num);
+                const cardClass = isCollected ? 'pokemon-card-collection collected' : 'pokemon-card-collection not-collected';
+                
+                if (isCollected) {
+                    html += `
+                        <div class="${cardClass}">
+                            <div class="pokemon-number">#${String(pokemon.num).padStart(3, '0')}</div>
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png" 
+                                 alt="${pokemon.name}">
+                            <div class="pokemon-name">${pokemon.name}</div>
+                            <div class="pokemon-types">
+                                ${pokemon.types.map(type => `<span class="type-badge type-${type}">${type}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="${cardClass}">
+                            <div class="pokemon-number">???</div>
+                            <div class="silhouette">❓</div>
+                            <div class="pokemon-name">???</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += '</div>';
+            grid.innerHTML = html;
+        }
+        
+        // Fonction pour charger les badges dans l'onglet
+        function loadBadgesInTab() {
+            const panel = document.getElementById('panel-badges');
+            
+            if (!currentPlayer) {
+                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucun joueur sélectionné</div>';
+                return;
+            }
+            
+            const data = playerData[currentPlayer];
+            if (!data) {
+                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucune donnée disponible</div>';
+                return;
+            }
+            
+            // Créer le HTML des badges
+            let html = `
+                <div class="badges-header">
+                    <h2>🏆 Mes Badges</h2>
+                    <div style="font-size: 1.2em; margin-top: 10px;">
+                        <strong>${data.badges.length}</strong> / ${allBadges.length} badges obtenus
+                    </div>
+                </div>
+                <div class="badges-grid">
+            `;
+            
+            for (const badgeDef of allBadges) {
+                const isEarned = data.badges.includes(badgeDef.id);
+                const badgeClass = isEarned ? 'badge-card earned' : 'badge-card locked';
+                
+                html += `
+                    <div class="${badgeClass}">
+                        <div class="badge-icon">${badgeDef.icon}</div>
+                        <div class="badge-name">${badgeDef.name}</div>
+                        <div class="badge-description">${badgeDef.description}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            panel.innerHTML = html;
+        }
+        
+        // Bouton de confirmation pour changer de joueur - sera initialisé dans DOMContentLoaded
+
         // Bouton voir collection
-        viewCollectionBtn.addEventListener('click', () => {
-            // Réinitialiser l'onglet actif sur "Toutes"
-            document.querySelectorAll('#generationTabs .gen-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('#generationTabs .gen-tab[data-gen="all"]').classList.add('active');
-            showCollection('all');
-        });
 
         // Bouton voir badges
-        viewBadgesBtn.addEventListener('click', () => {
-            showBadges();
-        });
 
-        // Bouton retour de la collection
-        backFromCollectionBtn.addEventListener('click', () => {
-            collectionScreen.classList.remove('active');
-            configScreen.classList.remove('hidden');
-        });
+        // Bouton retour de la collection (plus nécessaire avec onglets)
 
-        // Bouton retour des badges
-        backFromBadgesBtn.addEventListener('click', () => {
-            badgesScreen.classList.remove('active');
-            configScreen.classList.remove('hidden');
-        });
+        // Bouton retour des badges (plus nécessaire avec onglets)
 
         // Bouton retour du détail d'un badge
         backFromBadgeDetailBtn.addEventListener('click', () => {
@@ -2096,17 +2376,6 @@
         });
 
         // Bouton changer de joueur
-        changePlayerBtn.addEventListener('click', () => {
-            if (confirm('Retourner à la sélection de joueur ?')) {
-                currentPlayer = null;
-                configScreen.classList.add('hidden');
-                playerSelectionScreen.classList.remove('hidden');
-                document.querySelector('h1').innerHTML = '🎮 Mon Pokédex';
-                
-                // Réafficher les boutons backup
-                document.querySelector('.backup-controls').classList.add('show');
-            }
-        });
 
         // Charger les données des joueurs depuis localStorage
         function loadPlayerData() {
@@ -3072,6 +3341,34 @@
 
         // Supprimer les anciens event listeners sur les filtres
         // (plus nécessaires car on configure avant de jouer)
+    
+        // =====================================
+        // INITIALISATION GLOBALE AU CHARGEMENT
+        // =====================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialiser le système d'onglets
+            initializeTabs();
+            
+            // Configurer le bouton de changement de joueur
+            const confirmBtn = document.getElementById('confirmChangePlayerBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => {
+                    if (confirm('Retourner à la sélection de joueur ?')) {
+                        currentPlayer = null;
+                        configScreen.classList.add('hidden');
+                        playerSelectionScreen.classList.remove('hidden');
+                        document.querySelector('h1').innerHTML = '🎮 Mon Pokédex';
+                        
+                        // Réafficher les boutons backup
+                        const backupControls = document.querySelector('.backup-controls');
+                        if (backupControls) {
+                            backupControls.classList.add('show');
+                        }
+                    }
+                });
+            }
+        });
+
     </script>
 </body>
 </html>
