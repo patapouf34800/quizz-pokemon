@@ -1,0 +1,3077 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Pokédex - Quiz pour Enfants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #FFD93D 0%, #6BCB77 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FF6B6B;
+            margin-bottom: 5px;
+            font-size: 2.5em;
+            text-shadow: 3px 3px 0px #FFE66D;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4ECDC4;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .player-selection-screen {
+            display: block;
+        }
+
+        .player-selection-screen.hidden {
+            display: none;
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .player-card h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .player-input-group {
+            margin: 20px 0;
+        }
+
+        .player-input-group label {
+            display: block;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .player-input-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.5em;
+            border: 3px solid white;
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Comic Sans MS', Arial;
+        }
+
+        .saved-players {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .saved-players h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .player-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 3px solid #4ECDC4;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .player-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .player-item .name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .player-item .stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .player-item .delete-btn {
+            margin-top: 10px;
+            padding: 5px 15px;
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .player-item .delete-btn:hover {
+            background: #e53e3e;
+        }
+
+        .config-screen {
+            display: block;
+        }
+
+        .config-screen.hidden {
+            display: none;
+        }
+
+        .collection-screen {
+            display: none;
+        }
+
+        .collection-screen.active {
+            display: block;
+        }
+
+        .collection-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .collection-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .collection-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 1.2em;
+        }
+
+        .generation-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .gen-tab {
+            background: #e0e0e0;
+            color: #333;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 3px solid #ccc;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', Arial;
+        }
+
+        .gen-tab:hover {
+            background: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .gen-tab.active {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            border-color: #4ECDC4;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .gen-tab .count {
+            display: block;
+            font-size: 0.85em;
+            margin-top: 3px;
+            opacity: 0.9;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .pokemon-card-collection {
+            background: white;
+            border: 3px solid #4ECDC4;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .pokemon-card-collection:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .pokemon-card-collection img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            transform: scale(2.5);
+            margin: 10px 0;
+        }
+
+        .pokemon-card-collection .number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .pokemon-card-collection .name {
+            font-size: 1em;
+            color: #333;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .pokemon-card-collection .types {
+            margin-top: 8px;
+        }
+
+        /* Carte Pokémon non capturé (silhouette) */
+        .pokemon-card-silhouette {
+            background: white;
+            border: 3px solid #ccc;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .pokemon-card-silhouette img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            transform: scale(2.5);
+            margin: 10px 0;
+            filter: brightness(0);
+            opacity: 0.4;
+        }
+
+        .pokemon-card-silhouette .number {
+            font-weight: bold;
+            color: #999;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .type-badge-small {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .collection-empty {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f7f7f7;
+            border-radius: 15px;
+            color: #666;
+        }
+
+        .collection-empty h3 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #FA709A, #FEE140);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .filters {
+            background: #F7F7F7;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 3px solid #FFE66D;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .generation-checkboxes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #4ECDC4;
+        }
+
+        .gen-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: normal !important;
+        }
+
+        .gen-checkbox:hover {
+            background: #f0f9ff;
+        }
+
+        .gen-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #4ECDC4;
+        }
+
+        .gen-checkbox.all-gens {
+            border-top: 2px solid #FFE66D;
+            margin-top: 5px;
+            padding-top: 13px;
+        }
+
+        .gen-checkbox.all-gens span {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #4ECDC4;
+            border-radius: 12px;
+            font-size: 18px;
+            background: white;
+            font-family: 'Comic Sans MS', Arial;
+        }
+
+        .big-start-button {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            padding: 25px 60px;
+            font-size: 2.2em;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', Arial;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            display: block;
+            margin: 30px auto 0;
+        }
+
+        .big-start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+        }
+
+        .progress-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.95;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .game-area {
+            text-align: center;
+        }
+
+        .pokemon-display {
+            background: linear-gradient(135deg, #F0F0F0, #FFFFFF);
+            border: 5px solid #4ECDC4;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .attempts-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .attempt-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #E0E0E0;
+            border: 2px solid #999;
+            transition: all 0.3s;
+        }
+
+        .attempt-dot.active {
+            background: #4ECDC4;
+            border-color: #44A08D;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.6);
+        }
+
+        .attempt-dot.used {
+            background: #FF6B6B;
+            border-color: #E85555;
+        }
+
+        .attempt-dot.last {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            }
+            50% {
+                transform: scale(1.2);
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            }
+        }
+
+        .pokemon-image-container {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 5px 20px rgba(0,0,0,0.1);
+            border: 4px solid #FFE66D;
+            overflow: hidden;
+        }
+
+        .pokemon-image-container img {
+            max-width: 95%;
+            max-height: 95%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transform: scale(3);
+        }
+
+        .hint-area {
+            margin-top: 15px;
+            min-height: 50px;
+        }
+
+        .hint-button {
+            background: #FFE66D;
+            color: #333;
+            border: 3px solid #FFD93D;
+            padding: 12px 35px;
+            font-size: 1.2em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', Arial;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .hint-button:hover {
+            background: #FFD93D;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .hint-display {
+            display: none;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+
+        .hint-display.show {
+            display: block;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            margin: 5px;
+            border-radius: 20px;
+            color: white;
+            font-size: 1.3em;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Couleurs des types Pokémon */
+        .type-normal { background: #A8A878; }
+        .type-feu { background: #F08030; }
+        .type-eau { background: #6890F0; }
+        .type-plante { background: #78C850; }
+        .type-électrik { background: #F8D030; color: #333; }
+        .type-glace { background: #98D8D8; }
+        .type-combat { background: #C03028; }
+        .type-poison { background: #A040A0; }
+        .type-sol { background: #E0C068; }
+        .type-vol { background: #A890F0; }
+        .type-psy { background: #F85888; }
+        .type-insecte { background: #A8B820; }
+        .type-roche { background: #B8A038; }
+        .type-spectre { background: #705898; }
+        .type-dragon { background: #7038F8; }
+        .type-ténèbres { background: #705848; }
+        .type-acier { background: #B8B8D0; }
+        .type-fée { background: #EE99AC; }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        .input-label {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #pokemonInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.6em;
+            border: 4px solid #4ECDC4;
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Comic Sans MS', Arial;
+            background: #FFFEF7;
+        }
+
+        #pokemonInput:focus {
+            outline: none;
+            border-color: #FF6B6B;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', Arial;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            font-size: 1.8em;
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, #56CCF2, #2F80ED);
+            color: white;
+        }
+
+        .btn-skip {
+            background: linear-gradient(135deg, #F093FB, #F5576C);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #FA709A, #FEE140);
+            color: white;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.3em;
+            display: none;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #C6F6D5, #9AE6B4);
+            color: #22543D;
+            display: block;
+            border: 4px solid #48BB78;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #FED7D7, #FEB2B2);
+            color: #742A2A;
+            display: block;
+            border: 4px solid #F56565;
+        }
+
+        .feedback-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .welcome-message {
+            background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+            border: 4px solid #667eea;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .welcome-message h2 {
+            color: #4C51BF;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .welcome-message p {
+            font-size: 1.3em;
+            color: #5A67D8;
+            line-height: 1.6;
+        }
+
+        .instruction-box {
+            background: #FFF9E6;
+            border: 3px solid #FFE66D;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: all 0.5s;
+        }
+
+        .instruction-box.hidden {
+            display: none;
+        }
+
+        .instruction-box h3 {
+            color: #FF6B6B;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .instruction-step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+
+        .step-number {
+            background: #4ECDC4;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border: 3px solid #FFE66D;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 1.8em;
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+            background: #FFF9E6;
+        }
+
+        .music-control.playing {
+            animation: music-pulse 2s infinite;
+        }
+
+        @keyframes music-pulse {
+            0%, 100% {
+                box-shadow: 0 5px 15px rgba(255, 230, 109, 0.5);
+            }
+            50% {
+                box-shadow: 0 5px 25px rgba(255, 230, 109, 0.8);
+            }
+        }
+
+        .backup-controls {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .backup-controls.show {
+            display: flex;
+        }
+
+        .backup-btn {
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: #666;
+            font-weight: bold;
+        }
+
+        .backup-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Styles pour les badges */
+        .badges-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .badge-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .badge-card.earned {
+            border-color: #4ECDC4;
+            box-shadow: 0 3px 10px rgba(78, 205, 196, 0.3);
+        }
+
+        .badge-card.earned:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .badge-image-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+        }
+
+        .badge-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%) opacity(0.3);
+        }
+
+        .badge-card.earned .badge-image {
+            filter: none;
+        }
+
+        .badge-medal {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            font-size: 2em;
+            background: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .badge-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        .badge-progress {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .badge-card.earned .badge-progress {
+            color: #4ECDC4;
+            font-weight: bold;
+        }
+
+        .badge-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .badge-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .badge-bar-fill.bronze {
+            background: linear-gradient(90deg, #CD7F32, #B87333);
+        }
+
+        .badge-bar-fill.silver {
+            background: linear-gradient(90deg, #C0C0C0, #A8A8A8);
+        }
+
+        .badge-bar-fill.gold {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+        }
+
+        .badge-bar-fill.visible {
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+        }
+
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .backup-btn:active {
+            transform: translateY(0);
+        }
+
+        #importFileInput {
+            display: none;
+        }
+
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #FFE66D;
+            color: #333;
+            border: 3px solid #FFD93D;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 2em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: none;
+        }
+
+        .help-button.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+            background: #FFD93D;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Mon Pokédex</h1>
+        <p class="subtitle">Apprends à reconnaître et à écrire les Pokémon !</p>
+
+        <!-- ÉCRAN DE SÉLECTION DE JOUEUR -->
+        <div class="player-selection-screen" id="playerSelectionScreen">
+            <div class="player-card">
+                <h2>👤 Qui va jouer ?</h2>
+                <div class="player-input-group">
+                    <label for="playerName">Entre ton prénom :</label>
+                    <input 
+                        type="text" 
+                        id="playerName" 
+                        placeholder="Ex: Tom, Emma..." 
+                        maxlength="20"
+                        autocomplete="off"
+                    >
+                </div>
+                <button class="big-start-button" id="selectPlayerBtn">✅ C'est parti !</button>
+            </div>
+
+            <div class="saved-players" id="savedPlayersSection" style="display: none;">
+                <h3>📚 Joueurs enregistrés</h3>
+                <div class="player-list" id="playerList">
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN DE CONFIGURATION -->
+        <div class="config-screen hidden" id="configScreen">
+            <div class="instruction-box" id="instructionBox" style="display: none;">
+                <h3>📖 Comment jouer ?</h3>
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div>Regarde l'image du Pokémon à l'écran</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div>Si tu veux un indice, clique sur "Voir les types"</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div>Cherche dans ton Pokédex (livre) pour trouver son nom</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">4</div>
+                    <div>Écris son nom dans la case et valide !</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="btn-secondary" id="viewCollectionBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                    📚 Voir ma collection
+                </button>
+                <button class="btn-secondary" id="viewBadgesBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                    🏆 Mes badges
+                </button>
+                <button class="btn-warning" id="toggleInstructionsBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                    ❓ Comment jouer ?
+                </button>
+                <button class="btn-danger" id="changePlayerBtn" style="flex: 1; min-width: 200px; padding: 15px; font-size: 1.2em;">
+                    👤 Changer de joueur
+                </button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>🎯 Génération(s) :</label>
+                        <div class="generation-checkboxes">
+                            <label class="gen-checkbox">
+                                <input type="checkbox" value="1" class="gen-check">
+                                <span>Gen 1 (1-151)</span>
+                            </label>
+                            <label class="gen-checkbox">
+                                <input type="checkbox" value="2" class="gen-check">
+                                <span>Gen 2 (152-251)</span>
+                            </label>
+                            <label class="gen-checkbox">
+                                <input type="checkbox" value="3" class="gen-check">
+                                <span>Gen 3 (252-386)</span>
+                            </label>
+                            <label class="gen-checkbox">
+                                <input type="checkbox" value="4" class="gen-check">
+                                <span>Gen 4 (387-493)</span>
+                            </label>
+                            <label class="gen-checkbox">
+                                <input type="checkbox" value="5" class="gen-check">
+                                <span>Gen 5 (494-649)</span>
+                            </label>
+                            <label class="gen-checkbox all-gens">
+                                <input type="checkbox" id="allGensCheck">
+                                <span>✨ Toutes</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="typeFilter">⚡ Type :</label>
+                        <select id="typeFilter">
+                            <option value="all">Tous les types</option>
+                            <option value="normal">Normal</option>
+                            <option value="feu">Feu</option>
+                            <option value="eau">Eau</option>
+                            <option value="plante">Plante</option>
+                            <option value="électrik">Électrik</option>
+                            <option value="glace">Glace</option>
+                            <option value="combat">Combat</option>
+                            <option value="poison">Poison</option>
+                            <option value="sol">Sol</option>
+                            <option value="vol">Vol</option>
+                            <option value="psy">Psy</option>
+                            <option value="insecte">Insecte</option>
+                            <option value="roche">Roche</option>
+                            <option value="spectre">Spectre</option>
+                            <option value="dragon">Dragon</option>
+                            <option value="ténèbres">Ténèbres</option>
+                            <option value="acier">Acier</option>
+                            <option value="fée">Fée</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="pokemonCount">🔢 Nombre de Pokémon :</label>
+                        <input type="number" id="pokemonCount" min="1" max="50" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <button class="big-start-button" id="startBtn">🚀 Commencer la partie !</button>
+        </div>
+
+        <!-- ÉCRAN DE JEU -->
+        <div class="game-screen" id="gameScreen">
+            <div class="progress-info" id="progressInfo">Pokémon 1/10</div>
+
+            <div class="game-layout">
+                <!-- COLONNE GAUCHE : Image et indice -->
+                <div class="left-column">
+                    <div class="pokemon-display" id="pokemonDisplay">
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : Stats, input, boutons -->
+                <div class="right-column">
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-label">✅ Bonnes réponses</div>
+                            <div class="stat-value" id="score">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">⭐ Réussite</div>
+                            <div class="stat-value" id="percentage">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <div class="input-label">✏️ Écris le nom du Pokémon :</div>
+                        <input 
+                            type="text" 
+                            id="pokemonInput" 
+                            placeholder="Tape ici..." 
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                    </div>
+
+                    <div class="buttons">
+                        <button class="btn-validate" id="validateBtn">✔️ Valider</button>
+                        <button class="btn-skip" id="skipBtn">➡️ Passer</button>
+                    </div>
+
+                    <button class="btn-reset" id="resetBtn" style="width: 100%; margin-top: 10px;">🏠 Menu principal</button>
+
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN DE COLLECTION -->
+        <div class="collection-screen" id="collectionScreen">
+            <button class="back-button" id="backFromCollectionBtn">⬅️ Retour au menu</button>
+
+            <div class="collection-header">
+                <h2 id="collectionTitle">📚 Ma Collection Pokédex</h2>
+                <div class="collection-stats">
+                    <div>🎯 <strong id="collectionCount">0/649</strong> Pokémon capturés</div>
+                    <div>🎮 <strong id="gamesPlayedCount">0</strong> parties jouées</div>
+                </div>
+            </div>
+
+            <div class="generation-tabs" id="generationTabs">
+                <div class="gen-tab active" data-gen="all">
+                    Toutes<span class="count" id="countAll">0/649</span>
+                </div>
+                <div class="gen-tab" data-gen="1">
+                    Gen 1<span class="count" id="count1">0/151</span>
+                </div>
+                <div class="gen-tab" data-gen="2">
+                    Gen 2<span class="count" id="count2">0/100</span>
+                </div>
+                <div class="gen-tab" data-gen="3">
+                    Gen 3<span class="count" id="count3">0/135</span>
+                </div>
+                <div class="gen-tab" data-gen="4">
+                    Gen 4<span class="count" id="count4">0/107</span>
+                </div>
+                <div class="gen-tab" data-gen="5">
+                    Gen 5<span class="count" id="count5">0/156</span>
+                </div>
+            </div>
+
+            <div id="collectionContent">
+                <div class="collection-grid" id="collectionGrid">
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN DES BADGES -->
+        <div class="collection-screen" id="badgesScreen">
+            <button class="back-button" id="backFromBadgesBtn">⬅️ Retour au menu</button>
+
+            <div class="collection-header">
+                <h2 id="badgesTitle">🏆 Mes Badges</h2>
+                <div class="collection-stats">
+                    <div>📊 <strong id="badgesEarnedCount">0</strong> badges obtenus</div>
+                </div>
+            </div>
+
+            <div class="badges-section" style="display: block; margin-top: 20px;">
+                <div class="badges-grid" id="badgesDisplayGrid">
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN DÉTAIL D'UN BADGE -->
+        <div class="collection-screen" id="badgeDetailScreen">
+            <button class="back-button" id="backFromBadgeDetailBtn">⬅️ Retour aux badges</button>
+
+            <div class="collection-header">
+                <h2 id="badgeDetailTitle">🏆 Badge</h2>
+                <div class="collection-stats">
+                    <div>📊 <strong id="badgeDetailCount">0/0</strong> Pokémon capturés</div>
+                </div>
+            </div>
+
+            <div class="badges-section" style="display: block; margin-top: 20px;">
+                <div class="collection-grid" id="badgeDetailGrid">
+                </div>
+            </div>
+        </div>
+
+        <button class="help-button" id="helpButton" title="Voir les règles">❓</button>
+        <button class="music-control" id="musicControl" title="Musique on/off">🎵</button>
+        
+        <!-- Boutons de sauvegarde discrets -->
+        <div class="backup-controls">
+            <button class="backup-btn" id="exportBtn" title="Sauvegarder toutes les données">💾 Export</button>
+            <button class="backup-btn" id="importBtn" title="Restaurer des données">📥 Import</button>
+        </div>
+        <input type="file" id="importFileInput" accept=".json">
+    </div>
+
+    <script src="pokemon-database.js"></script>
+    <script>
+        // Variables du jeu
+        let score = 0;
+        let total = 0;
+        let currentPokemon = null;
+        let filteredPokemon = [];
+        let gamePokemonList = []; // Liste des Pokémon pour la partie en cours
+        let currentPokemonIndex = 0;
+        let maxPokemon = 10; // Nombre de Pokémon par partie
+        let hintShown = false;
+        let attempts = 0; // Nombre de tentatives pour le Pokémon actuel
+        let maxAttempts = 2; // Nombre d'essais autorisés
+        let skipsUsed = 0; // Nombre de passes utilisés dans la partie
+        let maxSkips = 2; // Nombre maximum de passes autorisés par partie
+        
+        // Système de joueurs et collection
+        let currentPlayer = null;
+        let playerData = {}; // { playerName: { collection: [1, 4, 7, ...], stats: {...} } }
+        
+        // Système de musique
+        let backgroundMusic = null;
+        let musicEnabled = true;
+        let currentMusicGen = null;
+        let currentSelectedGens = null; // Pour sauvegarder les générations de la partie en cours
+        
+        // Système de badges
+        let badgeConfig = null; // Configuration des badges chargée depuis le JSON
+
+        // Éléments DOM
+        const playerSelectionScreen = document.getElementById('playerSelectionScreen');
+        const configScreen = document.getElementById('configScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const collectionScreen = document.getElementById('collectionScreen');
+        const badgesScreen = document.getElementById('badgesScreen');
+        const badgeDetailScreen = document.getElementById('badgeDetailScreen');
+        const pokemonDisplay = document.getElementById('pokemonDisplay');
+        const pokemonInput = document.getElementById('pokemonInput');
+        const startBtn = document.getElementById('startBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const feedback = document.getElementById('feedback');
+        const generationFilter = document.getElementById('generationFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const pokemonCount = document.getElementById('pokemonCount');
+        const progressInfo = document.getElementById('progressInfo');
+        const helpButton = document.getElementById('helpButton');
+        const playerNameInput = document.getElementById('playerName');
+        const selectPlayerBtn = document.getElementById('selectPlayerBtn');
+        const viewCollectionBtn = document.getElementById('viewCollectionBtn');
+        const viewBadgesBtn = document.getElementById('viewBadgesBtn');
+        const backFromCollectionBtn = document.getElementById('backFromCollectionBtn');
+        const backFromBadgesBtn = document.getElementById('backFromBadgesBtn');
+        const backFromBadgeDetailBtn = document.getElementById('backFromBadgeDetailBtn');
+        const changePlayerBtn = document.getElementById('changePlayerBtn');
+        const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+        const instructionBox = document.getElementById('instructionBox');
+        const musicControl = document.getElementById('musicControl');
+        
+        // Gestion des checkboxes de génération
+        const genCheckboxes = document.querySelectorAll('.gen-check');
+        const allGensCheck = document.getElementById('allGensCheck');
+        
+        // Cocher "Toutes" par défaut
+        allGensCheck.checked = true;
+        genCheckboxes.forEach(cb => cb.checked = true);
+        
+        // Gestion du checkbox "Toutes"
+        allGensCheck.addEventListener('change', () => {
+            genCheckboxes.forEach(cb => cb.checked = allGensCheck.checked);
+        });
+        
+        // Gestion des checkboxes individuelles
+        genCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                // Si toutes sont cochées, cocher "Toutes"
+                const allChecked = Array.from(genCheckboxes).every(c => c.checked);
+                allGensCheck.checked = allChecked;
+                
+                // Si aucune n'est cochée, décocher "Toutes"
+                const noneChecked = Array.from(genCheckboxes).every(c => !c.checked);
+                if (noneChecked) {
+                    allGensCheck.checked = false;
+                }
+            });
+        });
+        
+        // Fonction pour obtenir les générations sélectionnées
+        function getSelectedGenerations() {
+            const selected = Array.from(genCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => parseInt(cb.value));
+            return selected.length > 0 ? selected : null;
+        }
+
+        // Éléments pour export/import
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const importFileInput = document.getElementById('importFileInput');
+
+        // Fonction d'export des données
+        exportBtn.addEventListener('click', () => {
+            if (Object.keys(playerData).length === 0) {
+                alert('Aucune donnée à exporter ! 😊\nCommence à jouer pour créer des profils.');
+                return;
+            }
+
+            // Créer un objet avec toutes les données + métadonnées
+            const exportData = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                players: playerData
+            };
+
+            // Convertir en JSON
+            const jsonString = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            
+            // Créer un lien de téléchargement
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Nom du fichier avec la date
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `pokemon-quiz-backup-${date}.json`;
+            
+            // Déclencher le téléchargement
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Données exportées avec succès !');
+            
+            // Message de confirmation
+            const playerCount = Object.keys(playerData).length;
+            alert(`✅ Sauvegarde réussie !\n\n📦 ${playerCount} joueur${playerCount > 1 ? 's' : ''} exporté${playerCount > 1 ? 's' : ''}\n💾 Fichier téléchargé : pokemon-quiz-backup-${date}.json`);
+        });
+
+        // Fonction d'import des données
+        importBtn.addEventListener('click', () => {
+            importFileInput.click();
+        });
+
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    
+                    // Valider la structure
+                    if (!importedData.players || typeof importedData.players !== 'object') {
+                        throw new Error('Format de fichier invalide');
+                    }
+                    
+                    // Demander confirmation
+                    const importedPlayerCount = Object.keys(importedData.players).length;
+                    const currentPlayerCount = Object.keys(playerData).length;
+                    
+                    let message = `📥 Import de sauvegarde\n\n`;
+                    message += `📦 Joueurs dans le fichier : ${importedPlayerCount}\n`;
+                    message += `👤 Joueurs actuels : ${currentPlayerCount}\n\n`;
+                    
+                    if (currentPlayerCount > 0) {
+                        message += `⚠️  Les données actuelles seront REMPLACÉES !\n\n`;
+                    }
+                    
+                    message += `Continuer ?`;
+                    
+                    if (!confirm(message)) {
+                        importFileInput.value = '';
+                        return;
+                    }
+                    
+                    // Importer les données
+                    playerData = importedData.players;
+                    savePlayerData();
+                    updatePlayerList();
+                    
+                    // Réafficher les boutons backup (on est toujours sur l'écran d'accueil)
+                    document.querySelector('.backup-controls').classList.add('show');
+                    
+                    // Message de succès
+                    alert(`✅ Import réussi !\n\n${importedPlayerCount} joueur${importedPlayerCount > 1 ? 's' : ''} importé${importedPlayerCount > 1 ? 's' : ''} !`);
+                    
+                    console.log('✅ Données importées avec succès !');
+                    
+                } catch (error) {
+                    alert(`❌ Erreur d'import !\n\n${error.message}\n\nAssure-toi d'utiliser un fichier de sauvegarde valide.`);
+                    console.error('Erreur import:', error);
+                }
+                
+                // Réinitialiser l'input
+                importFileInput.value = '';
+            };
+            
+            reader.onerror = () => {
+                alert('❌ Erreur de lecture du fichier !');
+                importFileInput.value = '';
+            };
+            
+            reader.readAsText(file);
+        });
+
+        // Fonction pour jouer la musique de fond selon la génération
+        function playBackgroundMusic(selectedGens) {
+            if (!musicEnabled) return;
+            
+            // Sauvegarder les générations pour pouvoir relancer la musique
+            if (selectedGens) {
+                currentSelectedGens = selectedGens;
+            }
+            
+            // Arrêter la musique actuelle et retirer les anciens listeners
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+            }
+            
+            // Déterminer quelle musique jouer
+            let musicFile;
+            
+            // Si plusieurs générations, choisir aléatoirement
+            if (!selectedGens || selectedGens.length === 0 || selectedGens.length > 1) {
+                // Choisir parmi les générations sélectionnées (ou toutes)
+                const gensToChoose = selectedGens && selectedGens.length > 1 
+                    ? selectedGens 
+                    : [1, 2, 3, 4, 5];
+                const randomGen = gensToChoose[Math.floor(Math.random() * gensToChoose.length)];
+                musicFile = `pokemon-music/gen${randomGen}.mp3`;
+                currentMusicGen = 'multiple';
+            } else {
+                // Une seule génération
+                musicFile = `pokemon-music/gen${selectedGens[0]}.mp3`;
+                currentMusicGen = selectedGens[0];
+            }
+            
+            // Créer et jouer la musique
+            backgroundMusic = new Audio(musicFile);
+            backgroundMusic.volume = 0.3; // 30% du volume
+            
+            // Si plusieurs générations, changer de musique aléatoire à la fin
+            // Si une seule génération, boucler sur la même
+            if (currentMusicGen === 'multiple') {
+                backgroundMusic.loop = false;
+                backgroundMusic.addEventListener('ended', () => {
+                    if (musicEnabled && currentSelectedGens) {
+                        playBackgroundMusic(currentSelectedGens);
+                    }
+                });
+            } else {
+                backgroundMusic.loop = true;
+            }
+            
+            backgroundMusic.onerror = () => {
+                console.log(`Musique non trouvée : ${musicFile}`);
+            };
+            
+            backgroundMusic.play().catch(err => {
+                console.log('Erreur lecture musique:', err);
+            });
+        }
+
+        // Fonction pour arrêter la musique
+        function stopBackgroundMusic() {
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+            }
+        }
+
+        // Contrôle de la musique (on/off)
+        musicControl.addEventListener('click', () => {
+            musicEnabled = !musicEnabled;
+            
+            if (musicEnabled) {
+                musicControl.textContent = '🎵';
+                musicControl.classList.add('playing');
+                // Relancer la musique si on est en jeu
+                if (currentSelectedGens) {
+                    playBackgroundMusic(currentSelectedGens);
+                }
+            } else {
+                musicControl.textContent = '🔇';
+                musicControl.classList.remove('playing');
+                stopBackgroundMusic();
+            }
+        });
+
+        // Activer l'animation du bouton musique au démarrage
+        musicControl.classList.add('playing');
+
+        // Bouton toggle instructions
+        toggleInstructionsBtn.addEventListener('click', () => {
+            if (instructionBox.style.display === 'none') {
+                instructionBox.style.display = 'block';
+                toggleInstructionsBtn.textContent = '✖️ Masquer les règles';
+            } else {
+                instructionBox.style.display = 'none';
+                toggleInstructionsBtn.textContent = '❓ Comment jouer ?';
+            }
+        });
+
+        // Afficher la collection du joueur
+        function showCollection(selectedGen = 'all') {
+            if (!currentPlayer || !playerData[currentPlayer]) return;
+            
+            const player = playerData[currentPlayer];
+            const collection = player.collection.sort((a, b) => a - b); // Trier par numéro
+            
+            // Mettre à jour le titre et les stats globales
+            document.getElementById('collectionTitle').textContent = `📚 Collection de ${currentPlayer}`;
+            document.getElementById('collectionCount').textContent = `${collection.length}/649`;
+            document.getElementById('gamesPlayedCount').textContent = player.stats.gamesPlayed || 0;
+            
+            // Calculer les compteurs par génération
+            const genCounts = {
+                1: { caught: 0, total: 151 },
+                2: { caught: 0, total: 100 },
+                3: { caught: 0, total: 135 },
+                4: { caught: 0, total: 107 },
+                5: { caught: 0, total: 156 }
+            };
+            
+            collection.forEach(num => {
+                const pokemon = POKEMON_DATABASE.find(p => p.num === num);
+                if (pokemon && genCounts[pokemon.gen]) {
+                    genCounts[pokemon.gen].caught++;
+                }
+            });
+            
+            // Mettre à jour les compteurs dans les onglets
+            document.getElementById('countAll').textContent = `${collection.length}/649`;
+            document.getElementById('count1').textContent = `${genCounts[1].caught}/${genCounts[1].total}`;
+            document.getElementById('count2').textContent = `${genCounts[2].caught}/${genCounts[2].total}`;
+            document.getElementById('count3').textContent = `${genCounts[3].caught}/${genCounts[3].total}`;
+            document.getElementById('count4').textContent = `${genCounts[4].caught}/${genCounts[4].total}`;
+            document.getElementById('count5').textContent = `${genCounts[5].caught}/${genCounts[5].total}`;
+            
+            // Filtrer la collection selon la génération sélectionnée
+            let filteredCollection = collection;
+            if (selectedGen !== 'all') {
+                const genNum = parseInt(selectedGen);
+                filteredCollection = collection.filter(num => {
+                    const pokemon = POKEMON_DATABASE.find(p => p.num === num);
+                    return pokemon && pokemon.gen === genNum;
+                });
+            }
+            
+            // Afficher la grille
+            const grid = document.getElementById('collectionGrid');
+            
+            if (filteredCollection.length === 0) {
+                const genName = selectedGen === 'all' ? 'ta collection' : `la génération ${selectedGen}`;
+                grid.innerHTML = `
+                    <div class="collection-empty" style="grid-column: 1 / -1;">
+                        <h3>🎮 Aucun Pokémon</h3>
+                        <p style="font-size: 1.2em; margin-top: 10px;">
+                            Tu n'as pas encore capturé de Pokémon de ${genName} !
+                        </p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = '';
+                
+                filteredCollection.forEach(num => {
+                    const pokemon = POKEMON_DATABASE.find(p => p.num === num);
+                    if (!pokemon) return;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'pokemon-card-collection';
+                    
+                    const imgPath = getPokemonImagePath(num);
+                    
+                    card.innerHTML = `
+                        <div class="number">#${num.toString().padStart(3, '0')}</div>
+                        <img src="${imgPath}" alt="${pokemon.name}" onerror="this.src=''; this.style.display='none';">
+                        <div class="name">${pokemon.name}</div>
+                        <div class="types">
+                            ${pokemon.types.map(type => 
+                                `<span class="type-badge-small type-${type}">${type}</span>`
+                            ).join('')}
+                        </div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            }
+            
+            // Afficher l'écran de collection
+            configScreen.classList.add('hidden');
+            collectionScreen.classList.add('active');
+        }
+
+        // Afficher l'écran des badges
+        function showBadges() {
+            if (!currentPlayer || !playerData[currentPlayer]) return;
+            
+            const player = playerData[currentPlayer];
+            
+            // Mettre à jour le titre
+            document.getElementById('badgesTitle').textContent = `🏆 Badges de ${currentPlayer}`;
+            
+            // Calculer les badges obtenus (TOUS types confondus)
+            const badges = calculatePlayerBadges(currentPlayer);
+            const badgesGrid = document.getElementById('badgesDisplayGrid');
+            
+            badgesGrid.innerHTML = '';
+            
+            // Ordre des 18 types
+            const allTypesOrder = [
+                'eau', 'normal', 'vol', 'plante', 'psy', 'insecte', 
+                'sol', 'poison', 'feu', 'roche', 'combat', 'électrik', 
+                'ténèbres', 'acier', 'dragon', 'glace', 'spectre', 'fée'
+            ];
+            
+            let earnedCount = 0;
+            
+            // Ajouter un titre pour les badges de captures (types)
+            const captureTitle = document.createElement('h3');
+            captureTitle.style.cssText = 'grid-column: 1 / -1; text-align: center; color: #4ECDC4; margin: 10px 0 20px; font-size: 1.5em;';
+            captureTitle.textContent = '🎯 Badges Captures';
+            badgesGrid.appendChild(captureTitle);
+            
+            allTypesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Compter comme "obtenu" si au moins visible (25%)
+                if (level) earnedCount++;
+                
+                // Médaille selon le niveau et les pourcentages
+                let medal = '';
+                if (percentage >= 100) {
+                    medal = ''; // Pas de médaille à 100%
+                } else if (level === 'gold' || percentage >= 75) {
+                    medal = '🥇'; // Or pour 75-99%
+                } else if (level === 'silver' || percentage >= 50) {
+                    medal = '🥈'; // Argent pour 50-74%
+                } else if (level === 'bronze' || level === 'visible' || percentage >= 25) {
+                    medal = '🥉'; // Bronze pour 25-49%
+                }
+                
+                const card = document.createElement('div');
+                // Badge "earned" (non grisé) UNIQUEMENT si 100%
+                const isComplete = percentage == 100;
+                card.className = `badge-card ${isComplete ? 'earned' : ''}`;
+                
+                const badgeFileName = type + '.png';
+                
+                card.innerHTML = `
+                    <div class="badge-image-container">
+                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        ${medal ? `<div class="badge-medal">${medal}</div>` : ''}
+                    </div>
+                    <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                    <div class="badge-bar">
+                        <div class="badge-bar-fill ${level || ''}" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                // Ajouter un clic pour ouvrir le détail du badge
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    showBadgeDetail(type, badge);
+                });
+                
+                badgesGrid.appendChild(card);
+            });
+            
+            // Ajouter un titre pour les badges spéciaux
+            const specialTitle = document.createElement('h3');
+            specialTitle.style.cssText = 'grid-column: 1 / -1; text-align: center; color: #FF6B9D; margin: 30px 0 10px; font-size: 1.5em;';
+            specialTitle.textContent = '✨ Badges Spéciaux';
+            badgesGrid.appendChild(specialTitle);
+            
+            // Afficher les badges spéciaux
+            const specialBadgesOrder = ['starter', 'évoli', 'fossile', 'bébé', 'fabuleux', 'légendaire'];
+            
+            specialBadgesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Compter comme "obtenu" seulement si 100%
+                if (level === 'gold') earnedCount++;
+                
+                const card = document.createElement('div');
+                // Badge "earned" (non grisé) seulement si 100%
+                card.className = `badge-card ${level === 'gold' ? 'earned' : ''}`;
+                
+                const badgeFileName = type + '.png';
+                
+                card.innerHTML = `
+                    <div class="badge-image-container">
+                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                    </div>
+                    <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                    <div class="badge-bar">
+                        <div class="badge-bar-fill ${level === 'gold' ? 'gold' : ''}" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                // Ajouter un clic pour ouvrir le détail du badge
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    showBadgeDetail(type, badge);
+                });
+                
+                badgesGrid.appendChild(card);
+            });
+            
+            // Ajouter un titre pour les badges dresseurs
+            const trainerTitle = document.createElement('h3');
+            trainerTitle.style.cssText = 'grid-column: 1 / -1; text-align: center; color: #FFA500; margin: 30px 0 10px; font-size: 1.5em;';
+            trainerTitle.textContent = '👤 Badges Dresseurs';
+            badgesGrid.appendChild(trainerTitle);
+            
+            // Afficher les badges dresseurs
+            const trainerBadgesOrder = ['sacha', 'ondine', 'pierre', 'jessie', 'james', 'rival'];
+            
+            trainerBadgesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Pour les badges dresseurs : seulement "earned" si 100%
+                if (level === 'gold') earnedCount++;
+                
+                const card = document.createElement('div');
+                // Badge "earned" seulement si 100%
+                card.className = `badge-card ${level === 'gold' ? 'earned' : ''}`;
+                
+                const badgeFileName = type + '.png';
+                
+                card.innerHTML = `
+                    <div class="badge-image-container">
+                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                    </div>
+                    <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                    <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                    <div class="badge-bar">
+                        <div class="badge-bar-fill ${level === 'gold' ? 'gold' : ''}" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                // Ajouter un clic pour ouvrir le détail du badge
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    showBadgeDetail(type, badge);
+                });
+                
+                badgesGrid.appendChild(card);
+            });
+            
+            // Mettre à jour le compteur de badges obtenus (au moins visible)
+            document.getElementById('badgesEarnedCount').textContent = earnedCount;
+            
+            // Afficher l'écran des badges
+            configScreen.classList.add('hidden');
+            badgesScreen.classList.add('active');
+        }
+
+        // Afficher le détail d'un badge (tous les Pokémon du type)
+        function showBadgeDetail(badgeType, badgeInfo) {
+            if (!currentPlayer || !playerData[currentPlayer]) return;
+            
+            const collection = playerData[currentPlayer].collection;
+            
+            // Mettre à jour le titre
+            const badgeName = badgeType.charAt(0).toUpperCase() + badgeType.slice(1);
+            document.getElementById('badgeDetailTitle').textContent = `🏆 Badge ${badgeName}`;
+            document.getElementById('badgeDetailCount').textContent = `${badgeInfo.captured}/${badgeInfo.total}`;
+            
+            const detailGrid = document.getElementById('badgeDetailGrid');
+            detailGrid.innerHTML = '';
+            
+            // Récupérer tous les Pokémon concernés par ce badge
+            let pokemonList = [];
+            
+            if (badgeType === 'bébé') {
+                // Badge spécial : tous les bébés Pokémon
+                pokemonList = POKEMON_DATABASE.filter(p => p.baby === true);
+            } else if (badgeType === 'légendaire') {
+                // Badge spécial : tous les Pokémon légendaires
+                pokemonList = POKEMON_DATABASE.filter(p => p.legendary === true);
+            } else if (badgeType === 'fabuleux') {
+                // Badge spécial : tous les Pokémon fabuleux
+                pokemonList = POKEMON_DATABASE.filter(p => p.mythical === true);
+            } else if (badgeType === 'starter') {
+                // Badge spécial : tous les starters (Gen 1-5)
+                const startersNumbers = [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9,
+                    152, 153, 154, 155, 156, 157, 158, 159, 160,
+                    252, 253, 254, 255, 256, 257, 258, 259, 260,
+                    387, 388, 389, 390, 391, 392, 393, 394, 395,
+                    495, 496, 497, 498, 499, 500, 501, 502, 503
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => startersNumbers.includes(p.num));
+            } else if (badgeType === 'fossile') {
+                // Badge spécial : tous les fossiles (Gen 1-5)
+                const fossilesNumbers = [
+                    138, 139, 140, 141, 142, 345, 346, 347, 348, 408, 409, 410, 411, 564, 565, 566, 567
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => fossilesNumbers.includes(p.num));
+            } else if (badgeType === 'évoli') {
+                // Badge spécial : famille Évoli (Gen 1-5)
+                const evoliNumbers = [133, 134, 135, 136, 196, 197];
+                pokemonList = POKEMON_DATABASE.filter(p => evoliNumbers.includes(p.num));
+            } else if (badgeType === 'sacha') {
+                // Badge dresseur : Pokémon de Sacha (Gen 1-5)
+                const sachaPokemonNumbers = [
+                    25, 10, 11, 12, 17, 18, 1, 4, 5, 6, 7, 98, 99, 56, 57, 89, 128,
+                    131, 143, 214, 152, 153, 155, 156, 158, 164, 231, 232,
+                    276, 277, 252, 253, 254, 341, 324, 361, 362,
+                    396, 397, 398, 387, 388, 389, 390, 391, 392, 418, 451, 472, 443,
+                    519, 520, 521, 501, 498, 499, 495, 559, 540, 541, 542, 536, 524, 525, 551, 552, 553
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => sachaPokemonNumbers.includes(p.num));
+            } else if (badgeType === 'ondine') {
+                // Badge dresseur : Pokémon d'Ondine
+                const ondinePokemonNumbers = [
+                    120, 121, 54, 60, 61, 186, 129, 130, 298, 118, 116, 86, 87, 222, 370, 175
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => ondinePokemonNumbers.includes(p.num));
+            } else if (badgeType === 'jessie') {
+                // Badge dresseur : Pokémon de Jessie (Gen 1-5)
+                const jessiePokemonNumbers = [
+                    23, 24, 108, 90, 129, 202, 193, 265, 269, 336, 469, 527, 592
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => jessiePokemonNumbers.includes(p.num));
+            } else if (badgeType === 'james') {
+                // Badge dresseur : Pokémon de James (Gen 1-5)
+                const jamesPokemonNumbers = [
+                    70, 71, 58, 130, 129, 109, 110, 331, 439, 591, 593, 562, 594
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => jamesPokemonNumbers.includes(p.num));
+            } else if (badgeType === 'pierre') {
+                // Badge dresseur : Pokémon de Pierre (Gen 1-5)
+                const pierrePokemonNumbers = [
+                    37, 41, 42, 74, 95, 169, 185, 204, 205, 208, 242, 271, 272, 439, 453
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => pierrePokemonNumbers.includes(p.num));
+            } else if (badgeType === 'rival') {
+                // Badge dresseur : Pokémon du Rival (Gen 1-5, sans starters, sans Évoli)
+                const rivalPokemonNumbers = [
+                    16, 17, 18, 27, 28, 42, 58, 59, 63, 64, 65, 77, 78, 81, 82, 92, 93, 94, 
+                    102, 103, 111, 112, 129, 130, 143, 163, 164, 169, 214, 215, 271, 272, 275, 
+                    278, 279, 315, 320, 321, 357, 396, 397, 398, 407, 419, 504, 505, 506, 507, 
+                    508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 572
+                ];
+                pokemonList = POKEMON_DATABASE.filter(p => rivalPokemonNumbers.includes(p.num));
+            } else {
+                // Badge de type : tous les Pokémon de ce type
+                pokemonList = POKEMON_DATABASE.filter(p => p.types.includes(badgeType));
+            }
+            
+            // Trier par numéro Pokédex
+            pokemonList.sort((a, b) => a.num - b.num);
+            
+            // Afficher chaque Pokémon
+            pokemonList.forEach(pokemon => {
+                const isCaptured = collection.includes(pokemon.num);
+                
+                const card = document.createElement('div');
+                card.className = isCaptured ? 'pokemon-card-collection' : 'pokemon-card-silhouette';
+                
+                const imgPath = getPokemonImagePath(pokemon.num);
+                
+                card.innerHTML = `
+                    <div class="number">#${pokemon.num.toString().padStart(3, '0')}</div>
+                    <img src="${imgPath}" alt="${pokemon.name}" onerror="this.style.display='none';">
+                `;
+                
+                detailGrid.appendChild(card);
+            });
+            
+            // Afficher l'écran de détail
+            badgesScreen.classList.remove('active');
+            badgeDetailScreen.classList.add('active');
+        }
+
+        // Gestion des onglets de génération
+        document.getElementById('generationTabs').addEventListener('click', (e) => {
+            const tab = e.target.closest('.gen-tab');
+            if (!tab) return;
+            
+            // Mettre à jour l'onglet actif
+            document.querySelectorAll('.gen-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Afficher la génération sélectionnée
+            const gen = tab.getAttribute('data-gen');
+            showCollection(gen);
+        });
+
+        // Bouton voir collection
+        viewCollectionBtn.addEventListener('click', () => {
+            // Réinitialiser l'onglet actif sur "Toutes"
+            document.querySelectorAll('#generationTabs .gen-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#generationTabs .gen-tab[data-gen="all"]').classList.add('active');
+            showCollection('all');
+        });
+
+        // Bouton voir badges
+        viewBadgesBtn.addEventListener('click', () => {
+            showBadges();
+        });
+
+        // Bouton retour de la collection
+        backFromCollectionBtn.addEventListener('click', () => {
+            collectionScreen.classList.remove('active');
+            configScreen.classList.remove('hidden');
+        });
+
+        // Bouton retour des badges
+        backFromBadgesBtn.addEventListener('click', () => {
+            badgesScreen.classList.remove('active');
+            configScreen.classList.remove('hidden');
+        });
+
+        // Bouton retour du détail d'un badge
+        backFromBadgeDetailBtn.addEventListener('click', () => {
+            badgeDetailScreen.classList.remove('active');
+            badgesScreen.classList.add('active');
+        });
+
+        // Bouton changer de joueur
+        changePlayerBtn.addEventListener('click', () => {
+            if (confirm('Retourner à la sélection de joueur ?')) {
+                currentPlayer = null;
+                configScreen.classList.add('hidden');
+                playerSelectionScreen.classList.remove('hidden');
+                document.querySelector('h1').innerHTML = '🎮 Mon Pokédex';
+                
+                // Réafficher les boutons backup
+                document.querySelector('.backup-controls').classList.add('show');
+            }
+        });
+
+        // Charger les données des joueurs depuis localStorage
+        function loadPlayerData() {
+            const saved = localStorage.getItem('pokemonQuizPlayers');
+            if (saved) {
+                playerData = JSON.parse(saved);
+            }
+            updatePlayerList();
+        }
+
+        // Sauvegarder les données des joueurs
+        function savePlayerData() {
+            localStorage.setItem('pokemonQuizPlayers', JSON.stringify(playerData));
+        }
+
+        // Ajouter un Pokémon à la collection du joueur
+        function addToCollection(pokemonNum) {
+            console.log('🔍 addToCollection appelé:', {
+                pokemonNum,
+                currentPlayer,
+                playerDataExists: !!(currentPlayer && playerData[currentPlayer])
+            });
+            
+            if (!currentPlayer || !playerData[currentPlayer]) {
+                console.error('❌ Impossible d\'ajouter à la collection : joueur non trouvé');
+                return;
+            }
+            
+            if (!playerData[currentPlayer].collection.includes(pokemonNum)) {
+                playerData[currentPlayer].collection.push(pokemonNum);
+                savePlayerData();
+                console.log(`✨ ${currentPlayer} a ajouté #${pokemonNum} à sa collection ! Total: ${playerData[currentPlayer].collection.length}`);
+            } else {
+                console.log(`ℹ️ ${currentPlayer} avait déjà #${pokemonNum} dans sa collection`);
+            }
+        }
+
+        // Afficher la liste des joueurs
+        function updatePlayerList() {
+            const playerList = document.getElementById('playerList');
+            const savedPlayersSection = document.getElementById('savedPlayersSection');
+            
+            const playerNames = Object.keys(playerData);
+            
+            if (playerNames.length === 0) {
+                savedPlayersSection.style.display = 'none';
+                return;
+            }
+            
+            savedPlayersSection.style.display = 'block';
+            playerList.innerHTML = '';
+            
+            playerNames.forEach(name => {
+                const data = playerData[name];
+                const div = document.createElement('div');
+                div.className = 'player-item';
+                div.innerHTML = `
+                    <div class="name">👤 ${name}</div>
+                    <div class="stats">
+                        🎯 Collection : ${data.collection.length}/649<br>
+                        📊 Parties : ${data.stats.gamesPlayed || 0}
+                    </div>
+                    <button class="delete-btn" onclick="deletePlayer('${name}'); event.stopPropagation();">🗑️ Supprimer</button>
+                `;
+                
+                // Clic sur la carte = jouer avec ce joueur
+                div.onclick = (e) => {
+                    if (!e.target.classList.contains('delete-btn')) {
+                        selectExistingPlayer(name);
+                    }
+                };
+                
+                playerList.appendChild(div);
+            });
+        }
+
+        // Sélectionner un joueur existant
+        function selectExistingPlayer(name) {
+            currentPlayer = name;
+            playerSelectionScreen.classList.add('hidden');
+            configScreen.classList.remove('hidden');
+            updateTitle();
+            
+            // Cacher les boutons backup
+            document.querySelector('.backup-controls').classList.remove('show');
+        }
+
+        // Supprimer un joueur (fonction globale pour accès depuis HTML inline)
+        window.deletePlayer = function(name) {
+            if (confirm(`Supprimer le profil de ${name} ? Cette action est irréversible.`)) {
+                delete playerData[name];
+                savePlayerData();
+                updatePlayerList();
+            }
+        };
+
+        // Mettre à jour le titre avec le nom du joueur
+        function updateTitle() {
+            if (currentPlayer) {
+                document.querySelector('h1').innerHTML = `🎮 Mon Pokédex - ${currentPlayer}`;
+            }
+        }
+
+        // Sélection du joueur
+        selectPlayerBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            
+            if (name === '') {
+                alert('Entre ton prénom pour commencer ! 😊');
+                return;
+            }
+            
+            currentPlayer = name;
+            
+            // Créer le profil s'il n'existe pas
+            if (!playerData[currentPlayer]) {
+                playerData[currentPlayer] = {
+                    collection: [],
+                    stats: {
+                        gamesPlayed: 0,
+                        totalScore: 0,
+                        totalAttempts: 0,
+                        perfectGames: 0
+                    }
+                };
+                savePlayerData();
+            }
+            
+            playerSelectionScreen.classList.add('hidden');
+            configScreen.classList.remove('hidden');
+            updateTitle();
+            
+            // Cacher les boutons backup
+            document.querySelector('.backup-controls').classList.remove('show');
+        });
+
+        // Touche Entrée sur le nom du joueur
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                selectPlayerBtn.click();
+            }
+        });
+
+        // Charger les données au démarrage
+        loadPlayerData();
+        
+        // Configuration des badges embarquée (Tous les types, toutes générations)
+        badgeConfig = {
+            "all_types": {
+                "eau": {"type": "eau", "total_available": 109, "levels": {"visible": 28, "bronze": 55, "silver": 82, "gold": 109}},
+                "normal": {"type": "normal", "total_available": 89, "levels": {"visible": 23, "bronze": 45, "silver": 67, "gold": 89}},
+                "vol": {"type": "vol", "total_available": 82, "levels": {"visible": 21, "bronze": 41, "silver": 62, "gold": 82}},
+                "plante": {"type": "plante", "total_available": 75, "levels": {"visible": 19, "bronze": 38, "silver": 57, "gold": 75}},
+                "psy": {"type": "psy", "total_available": 68, "levels": {"visible": 17, "bronze": 34, "silver": 51, "gold": 68}},
+                "insecte": {"type": "insecte", "total_available": 63, "levels": {"visible": 16, "bronze": 32, "silver": 48, "gold": 63}},
+                "sol": {"type": "sol", "total_available": 58, "levels": {"visible": 15, "bronze": 29, "silver": 44, "gold": 58}},
+                "poison": {"type": "poison", "total_available": 57, "levels": {"visible": 15, "bronze": 29, "silver": 43, "gold": 57}},
+                "feu": {"type": "feu", "total_available": 48, "levels": {"visible": 12, "bronze": 24, "silver": 36, "gold": 48}},
+                "roche": {"type": "roche", "total_available": 47, "levels": {"visible": 12, "bronze": 24, "silver": 36, "gold": 47}},
+                "combat": {"type": "combat", "total_available": 40, "levels": {"visible": 10, "bronze": 20, "silver": 30, "gold": 40}},
+                "électrik": {"type": "électrik", "total_available": 39, "levels": {"visible": 10, "bronze": 20, "silver": 30, "gold": 39}},
+                "ténèbres": {"type": "ténèbres", "total_available": 39, "levels": {"visible": 10, "bronze": 20, "silver": 30, "gold": 39}},
+                "acier": {"type": "acier", "total_available": 37, "levels": {"visible": 10, "bronze": 19, "silver": 28, "gold": 37}},
+                "dragon": {"type": "dragon", "total_available": 30, "levels": {"visible": 8, "bronze": 15, "silver": 23, "gold": 30}},
+                "glace": {"type": "glace", "total_available": 29, "levels": {"visible": 8, "bronze": 15, "silver": 22, "gold": 29}},
+                "spectre": {"type": "spectre", "total_available": 27, "levels": {"visible": 7, "bronze": 14, "silver": 21, "gold": 27}},
+                "fée": {"type": "fée", "total_available": 22, "levels": {"visible": 6, "bronze": 11, "silver": 17, "gold": 22}}
+            },
+            "special_badges": {
+                "bébé": {"type": "bébé", "category": "special", "total_available": 17, "levels": {"gold": 17}},
+                "légendaire": {"type": "légendaire", "category": "special", "total_available": 34, "levels": {"gold": 34}},
+                "fabuleux": {"type": "fabuleux", "category": "special", "total_available": 13, "levels": {"gold": 13}},
+                "starter": {"type": "starter", "category": "special", "total_available": 45, "levels": {"gold": 45}},
+                "fossile": {"type": "fossile", "category": "special", "total_available": 17, "levels": {"gold": 17}},
+                "évoli": {"type": "évoli", "category": "special", "total_available": 6, "levels": {"gold": 6}}
+            },
+            "trainer_badges": {
+                "sacha": {"type": "sacha", "category": "trainer", "total_available": 48, "levels": {"gold": 48}},
+                "ondine": {"type": "ondine", "category": "trainer", "total_available": 16, "levels": {"gold": 16}},
+                "jessie": {"type": "jessie", "category": "trainer", "total_available": 13, "levels": {"gold": 13}},
+                "james": {"type": "james", "category": "trainer", "total_available": 13, "levels": {"gold": 13}},
+                "pierre": {"type": "pierre", "category": "trainer", "total_available": 15, "levels": {"gold": 15}},
+                "rival": {"type": "rival", "category": "trainer", "total_available": 63, "levels": {"gold": 63}}
+            }
+        };
+        console.log('🏆 Configuration des badges chargée (18 types + badges spéciaux)');
+        
+        // Fonction pour calculer les badges obtenus par un joueur (TOUS types confondus)
+        function calculatePlayerBadges(playerName) {
+            if (!badgeConfig || !playerData[playerName]) {
+                return {};
+            }
+            
+            const collection = playerData[playerName].collection;
+            const allTypes = badgeConfig.all_types;
+            
+            const badges = {};
+            
+            // Pour chaque type
+            for (const [type, typeConfig] of Object.entries(allTypes)) {
+                // Compter combien de Pokémon de ce type le joueur a capturé (TOUTES générations)
+                const capturedOfType = collection.filter(pokemonNum => {
+                    const pokemon = POKEMON_DATABASE.find(p => p.num === pokemonNum);
+                    return pokemon && pokemon.types.includes(type);
+                }).length;
+                
+                const total = typeConfig.total_available;
+                const visible = typeConfig.levels.visible;
+                const bronze = typeConfig.levels.bronze;
+                const silver = typeConfig.levels.silver;
+                const gold = typeConfig.levels.gold;
+                
+                // Déterminer le niveau du badge
+                let level = null;
+                if (capturedOfType >= gold) {
+                    level = 'gold';
+                } else if (capturedOfType >= silver) {
+                    level = 'silver';
+                } else if (capturedOfType >= bronze) {
+                    level = 'bronze';
+                } else if (capturedOfType >= visible) {
+                    level = 'visible';
+                }
+                // Si < visible (25%), level reste null (badge grisé)
+                
+                badges[type] = {
+                    level: level,
+                    captured: capturedOfType,
+                    total: total,
+                    visible: visible,
+                    bronze: bronze,
+                    silver: silver,
+                    gold: gold
+                };
+            }
+            
+            // Calculer les badges spéciaux
+            const specialBadges = badgeConfig.special_badges;
+            
+            for (const [badgeType, badgeConfig] of Object.entries(specialBadges)) {
+                let capturedCount = 0;
+                
+                if (badgeType === 'bébé') {
+                    // Compter les bébés Pokémon capturés
+                    capturedCount = collection.filter(pokemonNum => {
+                        const pokemon = POKEMON_DATABASE.find(p => p.num === pokemonNum);
+                        return pokemon && pokemon.baby === true;
+                    }).length;
+                } else if (badgeType === 'légendaire') {
+                    // Compter les Pokémon légendaires capturés
+                    capturedCount = collection.filter(pokemonNum => {
+                        const pokemon = POKEMON_DATABASE.find(p => p.num === pokemonNum);
+                        return pokemon && pokemon.legendary === true;
+                    }).length;
+                } else if (badgeType === 'fabuleux') {
+                    // Compter les Pokémon fabuleux capturés
+                    capturedCount = collection.filter(pokemonNum => {
+                        const pokemon = POKEMON_DATABASE.find(p => p.num === pokemonNum);
+                        return pokemon && pokemon.mythical === true;
+                    }).length;
+                } else if (badgeType === 'starter') {
+                    // Compter les starters capturés (Gen 1-5)
+                    const startersNumbers = [
+                        1, 2, 3, 4, 5, 6, 7, 8, 9,
+                        152, 153, 154, 155, 156, 157, 158, 159, 160,
+                        252, 253, 254, 255, 256, 257, 258, 259, 260,
+                        387, 388, 389, 390, 391, 392, 393, 394, 395,
+                        495, 496, 497, 498, 499, 500, 501, 502, 503
+                    ];
+                    capturedCount = collection.filter(pokemonNum => 
+                        startersNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'fossile') {
+                    // Compter les fossiles capturés (Gen 1-5)
+                    const fossilesNumbers = [
+                        138, 139, 140, 141, 142, 345, 346, 347, 348, 408, 409, 410, 411, 564, 565, 566, 567
+                    ];
+                    capturedCount = collection.filter(pokemonNum => 
+                        fossilesNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'évoli') {
+                    // Compter la famille Évoli capturée (Gen 1-5)
+                    const evoliNumbers = [133, 134, 135, 136, 196, 197];
+                    capturedCount = collection.filter(pokemonNum => 
+                        evoliNumbers.includes(pokemonNum)
+                    ).length;
+                }
+                
+                const total = badgeConfig.total_available;
+                const visible = badgeConfig.levels.visible;
+                const bronze = badgeConfig.levels.bronze;
+                const silver = badgeConfig.levels.silver;
+                const gold = badgeConfig.levels.gold;
+                
+                // Déterminer le niveau du badge
+                let level = null;
+                if (capturedCount >= gold) {
+                    level = 'gold';
+                } else if (capturedCount >= silver) {
+                    level = 'silver';
+                } else if (capturedCount >= bronze) {
+                    level = 'bronze';
+                } else if (capturedCount >= visible) {
+                    level = 'visible';
+                }
+                
+                badges[badgeType] = {
+                    level: level,
+                    captured: capturedCount,
+                    total: total,
+                    visible: visible,
+                    bronze: bronze,
+                    silver: silver,
+                    gold: gold,
+                    category: 'special'
+                };
+            }
+            
+            // Calculer les badges dresseurs
+            const trainerBadges = badgeConfig.trainer_badges;
+            
+            for (const [badgeType, badgeConfigData] of Object.entries(trainerBadges)) {
+                let capturedCount = 0;
+                
+                if (badgeType === 'sacha') {
+                    // Liste hardcodée des Pokémon de Sacha (Gen 1-5)
+                    const sachaPokemonNumbers = [
+                        25, 10, 11, 12, 17, 18, 1, 4, 5, 6, 7, 98, 99, 56, 57, 89, 128,
+                        131, 143, 214, 152, 153, 155, 156, 158, 164, 231, 232,
+                        276, 277, 252, 253, 254, 341, 324, 361, 362,
+                        396, 397, 398, 387, 388, 389, 390, 391, 392, 418, 451, 472, 443,
+                        519, 520, 521, 501, 498, 499, 495, 559, 540, 541, 542, 536, 524, 525, 551, 552, 553
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        sachaPokemonNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'ondine') {
+                    // Liste hardcodée des Pokémon d'Ondine
+                    const ondinePokemonNumbers = [
+                        120, 121, 54, 60, 61, 186, 129, 130, 298, 118, 116, 86, 87, 222, 370, 175
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        ondinePokemonNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'jessie') {
+                    // Liste hardcodée des Pokémon de Jessie (Gen 1-5)
+                    const jessiePokemonNumbers = [
+                        23, 24, 108, 90, 129, 202, 193, 265, 269, 336, 469, 527, 592
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        jessiePokemonNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'james') {
+                    // Liste hardcodée des Pokémon de James (Gen 1-5)
+                    const jamesPokemonNumbers = [
+                        70, 71, 58, 130, 129, 109, 110, 331, 439, 591, 593, 562, 594
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        jamesPokemonNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'pierre') {
+                    // Liste hardcodée des Pokémon de Pierre (Gen 1-5)
+                    const pierrePokemonNumbers = [
+                        37, 41, 42, 74, 95, 169, 185, 204, 205, 208, 242, 271, 272, 439, 453
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        pierrePokemonNumbers.includes(pokemonNum)
+                    ).length;
+                } else if (badgeType === 'rival') {
+                    // Liste hardcodée des Pokémon du Rival (Gen 1-5, sans starters, sans Évoli)
+                    const rivalPokemonNumbers = [
+                        16, 17, 18, 27, 28, 42, 58, 59, 63, 64, 65, 77, 78, 81, 82, 92, 93, 94, 
+                        102, 103, 111, 112, 129, 130, 143, 163, 164, 169, 214, 215, 271, 272, 275, 
+                        278, 279, 315, 320, 321, 357, 396, 397, 398, 407, 419, 504, 505, 506, 507, 
+                        508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 572
+                    ];
+                    
+                    capturedCount = collection.filter(pokemonNum => 
+                        rivalPokemonNumbers.includes(pokemonNum)
+                    ).length;
+                }
+                
+                const total = badgeConfigData.total_available;
+                const gold = badgeConfigData.levels.gold;
+                
+                // Pour les badges dresseurs : uniquement or à 100%
+                let level = null;
+                if (capturedCount >= gold) {
+                    level = 'gold';
+                }
+                
+                badges[badgeType] = {
+                    level: level,
+                    captured: capturedCount,
+                    total: total,
+                    gold: gold,
+                    category: 'trainer'
+                };
+            }
+            
+            return badges;
+        }
+        
+        // Afficher les boutons backup sur l'écran d'accueil
+        const backupControls = document.querySelector('.backup-controls');
+        backupControls.classList.add('show');
+
+        // Bouton d'aide
+        helpButton.addEventListener('click', () => {
+            alert('📖 Comment jouer ?\n\n1️⃣ Regarde l\'image du Pokémon\n2️⃣ Clique sur "Voir les types" pour un indice\n3️⃣ Cherche dans ton Pokédex (livre)\n4️⃣ Écris le nom et valide !');
+        });
+
+        // Fonction pour obtenir le chemin de l'image locale
+        function getPokemonImagePath(num) {
+            return `pokemon-images/${num}.png`;
+        }
+
+        // Vérifier si une image existe
+        function imageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        // Filtrer les Pokémon selon les critères
+        function filterPokemon() {
+            const selectedGens = getSelectedGenerations();
+            const type = typeFilter.value;
+            
+            if (!selectedGens || selectedGens.length === 0) {
+                alert('Sélectionne au moins une génération ! 😊');
+                return false;
+            }
+            
+            console.log('🔍 Générations sélectionnées:', selectedGens);
+            
+            filteredPokemon = POKEMON_DATABASE.filter(pokemon => {
+                let matchGen = selectedGens.includes(pokemon.gen);
+                let matchType = type === 'all' || pokemon.types.includes(type);
+                return matchGen && matchType;
+            });
+            
+            console.log('📊 Pokémon filtrés:', filteredPokemon.length);
+            console.log('📋 Répartition par génération:');
+            selectedGens.forEach(gen => {
+                const count = filteredPokemon.filter(p => p.gen === gen).length;
+                console.log(`  Gen ${gen}: ${count} Pokémon`);
+            });
+            
+            return true;
+        }
+
+        // Préparer une partie avec X Pokémon et probabilités équilibrées par génération
+        function prepareGame() {
+            const count = parseInt(pokemonCount.value);
+            maxPokemon = count;
+            
+            if (filteredPokemon.length === 0) {
+                alert('Aucun Pokémon ne correspond à cette sélection ! 😅');
+                return false;
+            }
+            
+            // Vérifier qu'on a assez de Pokémon disponibles
+            if (count > filteredPokemon.length) {
+                alert(`Tu as demandé ${count} Pokémon, mais il n'y en a que ${filteredPokemon.length} disponibles avec ces filtres !\n\nLa partie va commencer avec ${filteredPokemon.length} Pokémon. 😊`);
+            }
+            
+            const collection = currentPlayer && playerData[currentPlayer] 
+                ? playerData[currentPlayer].collection 
+                : [];
+            
+            console.log('👤 Collection du joueur:', collection.length, 'Pokémon');
+            
+            // NOUVEAU SYSTÈME : Équiprobabilité entre générations, puis pondération nouveau/capturé
+            
+            // 1. Grouper les Pokémon par génération
+            const pokemonByGen = {};
+            const selectedGens = getSelectedGenerations();
+            
+            selectedGens.forEach(gen => {
+                pokemonByGen[gen] = filteredPokemon.filter(p => p.gen === gen);
+            });
+            
+            console.log('📊 Répartition par génération:');
+            selectedGens.forEach(gen => {
+                const total = pokemonByGen[gen].length;
+                const captured = pokemonByGen[gen].filter(p => collection.includes(p.num)).length;
+                const notCaptured = total - captured;
+                console.log(`  Gen ${gen}: ${total} total (${notCaptured} nouveaux, ${captured} capturés)`);
+            });
+            
+            // 2. Sélectionner les Pokémon en équilibrant les générations
+            gamePokemonList = [];
+            const selectedSet = new Set();
+            
+            // Pour chaque Pokémon à sélectionner
+            for (let i = 0; i < Math.min(count, filteredPokemon.length); i++) {
+                let selectedPokemon = null;
+                let attempts = 0;
+                const maxAttempts = 100; // Sécurité anti-boucle infinie
+                
+                while (!selectedPokemon && attempts < maxAttempts) {
+                    attempts++;
+                    
+                    // Choisir une génération aléatoirement (équiprobabilité)
+                    const randomGen = selectedGens[Math.floor(Math.random() * selectedGens.length)];
+                    const genPokemon = pokemonByGen[randomGen];
+                    
+                    if (genPokemon.length === 0) continue;
+                    
+                    // Dans cette génération, créer une liste pondérée
+                    const weightedGenList = [];
+                    for (const pokemon of genPokemon) {
+                        // Si déjà sélectionné, skip
+                        if (selectedSet.has(pokemon.num)) continue;
+                        
+                        const isInCollection = collection.includes(pokemon.num);
+                        const weight = isInCollection ? 1 : 2;
+                        
+                        for (let j = 0; j < weight; j++) {
+                            weightedGenList.push(pokemon);
+                        }
+                    }
+                    
+                    // Si la liste pondérée est vide, essayer une autre génération
+                    if (weightedGenList.length === 0) continue;
+                    
+                    // Choisir un Pokémon dans la liste pondérée
+                    const randomIndex = Math.floor(Math.random() * weightedGenList.length);
+                    selectedPokemon = weightedGenList[randomIndex];
+                }
+                
+                // Si on a trouvé un Pokémon, l'ajouter
+                if (selectedPokemon) {
+                    gamePokemonList.push(selectedPokemon);
+                    selectedSet.add(selectedPokemon.num);
+                } else {
+                    // Si on ne trouve plus de Pokémon, arrêter
+                    break;
+                }
+            }
+            
+            console.log('🎮 Pokémon sélectionnés pour la partie:');
+            const selectedByGen = {};
+            gamePokemonList.forEach(p => {
+                if (!selectedByGen[p.gen]) selectedByGen[p.gen] = 0;
+                selectedByGen[p.gen]++;
+            });
+            console.log(selectedByGen);
+            
+            currentPokemonIndex = 0;
+            score = 0;
+            total = 0;
+            
+            return true;
+        }
+
+        // Obtenir le Pokémon actuel de la partie
+        function getCurrentPokemon() {
+            if (currentPokemonIndex >= gamePokemonList.length) {
+                return null;
+            }
+            return gamePokemonList[currentPokemonIndex];
+        }
+
+        // Passer au Pokémon suivant
+        function nextPokemon() {
+            currentPokemonIndex++;
+            if (currentPokemonIndex >= gamePokemonList.length) {
+                endGame();
+                return false;
+            }
+            return true;
+        }
+
+        // Afficher la fin de partie
+        function endGame() {
+            const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+            
+            // Mettre à jour les stats du joueur
+            if (currentPlayer && playerData[currentPlayer]) {
+                playerData[currentPlayer].stats.gamesPlayed++;
+                playerData[currentPlayer].stats.totalScore += score;
+                playerData[currentPlayer].stats.totalAttempts += total;
+                if (percentage === 100) {
+                    playerData[currentPlayer].stats.perfectGames++;
+                }
+                savePlayerData();
+            }
+            
+            const collectionSize = currentPlayer && playerData[currentPlayer] 
+                ? playerData[currentPlayer].collection.length 
+                : 0;
+            
+            pokemonDisplay.innerHTML = `
+                <div class="welcome-message">
+                    <h2>🎉 Partie terminée !</h2>
+                    <p style="font-size: 2em; margin: 20px 0;">
+                        <strong>${score}/${total}</strong> bonnes réponses
+                    </p>
+                    <p style="font-size: 1.8em; color: #FF6B6B;">
+                        ${percentage}% de réussite !
+                    </p>
+                    ${percentage === 100 ? '<p style="font-size: 1.5em; margin-top: 20px;">🏆 PARFAIT ! Tu es un champion ! 🏆</p>' : ''}
+                    ${percentage >= 80 ? '<p style="font-size: 1.3em; margin-top: 15px;">⭐ Excellent travail !</p>' : ''}
+                    ${percentage >= 50 && percentage < 80 ? '<p style="font-size: 1.3em; margin-top: 15px;">👍 Bien joué !</p>' : ''}
+                    ${percentage < 50 ? '<p style="font-size: 1.3em; margin-top: 15px;">💪 Continue à t\'entraîner !</p>' : ''}
+                    <p style="margin-top: 30px; font-size: 1.2em; color: #667eea;">
+                        📚 Ta collection : <strong>${collectionSize}/649</strong> Pokémon
+                    </p>
+                    <p style="margin-top: 20px; font-size: 1.1em;">
+                        Clique sur "Menu principal" pour rejouer !
+                    </p>
+                </div>
+            `;
+            
+            pokemonInput.value = '';
+            feedback.style.display = 'none';
+        }
+
+        // Afficher un nouveau Pokémon
+        async function displayNewPokemon() {
+            currentPokemon = getCurrentPokemon();
+            if (!currentPokemon) {
+                return;
+            }
+            
+            // Réinitialiser les tentatives
+            attempts = 0;
+            
+            // Mettre à jour la progression
+            progressInfo.textContent = `Pokémon ${currentPokemonIndex + 1}/${gamePokemonList.length}`;
+            
+            hintShown = false;
+
+            const imgPath = getPokemonImagePath(currentPokemon.num);
+            const exists = await imageExists(imgPath);
+            
+            let displayHTML = `
+                <div class="attempts-indicator">
+                    <div class="attempt-dot active" id="attempt1"></div>
+                    <div class="attempt-dot active" id="attempt2"></div>
+                </div>
+                <div class="pokemon-image-container">
+            `;
+            
+            if (exists) {
+                displayHTML += `<img src="${imgPath}" alt="Pokémon mystère">`;
+            } else {
+                displayHTML += `<div style="font-size: 5em;">❓</div>`;
+            }
+            
+            displayHTML += `
+                </div>
+                <div class="hint-area">
+                    <button class="hint-button" onclick="showHint()">💡 Voir les types</button>
+                    <div class="hint-display" id="hintDisplay">
+                        <div style="margin-bottom: 10px; font-weight: bold; color: #333;">Les types de ce Pokémon :</div>
+            `;
+            
+            displayHTML += currentPokemon.types.map(type => 
+                `<span class="type-badge type-${type}">${type}</span>`
+            ).join('');
+            
+            displayHTML += `
+                    </div>
+                </div>
+            `;
+
+            pokemonDisplay.innerHTML = displayHTML;
+            pokemonInput.value = '';
+            pokemonInput.focus();
+            feedback.style.display = 'none';
+        }
+
+        // Fonction pour jouer le cri du Pokémon
+        function playPokemonCry(pokemonNum) {
+            // Essayer d'abord MP3, puis OGG
+            const formats = ['mp3', 'ogg'];
+            
+            function tryFormat(index) {
+                if (index >= formats.length) {
+                    console.log(`Aucun cri trouvé pour le Pokémon #${pokemonNum}`);
+                    return;
+                }
+                
+                const format = formats[index];
+                const audioPath = `pokemon-cries/${pokemonNum}.${format}`;
+                const audio = new Audio(audioPath);
+                
+                audio.onloadeddata = () => {
+                    console.log(`🎵 Lecture du cri #${pokemonNum} (${format})`);
+                    audio.volume = 0.35; // 35% du volume (divisé par 2)
+                    audio.play().catch(err => {
+                        console.log('Erreur lecture:', err);
+                        tryFormat(index + 1);
+                    });
+                };
+                
+                audio.onerror = () => {
+                    console.log(`Cri ${format} non trouvé, essai suivant...`);
+                    tryFormat(index + 1);
+                };
+                
+                // Forcer le chargement
+                audio.load();
+            }
+            
+            tryFormat(0);
+        }
+
+        // Afficher l'indice (fonction globale pour accès depuis HTML inline)
+        window.showHint = function() {
+            hintShown = true;
+            document.getElementById('hintDisplay').classList.add('show');
+        };
+
+        // Normaliser le texte pour la comparaison
+        function normalizeText(text) {
+            return text.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z]/g, "")
+                .trim();
+        }
+
+        // Valider la réponse
+        function validateAnswer() {
+            if (!currentPokemon) return;
+            
+            const userAnswer = normalizeText(pokemonInput.value);
+            const correctAnswer = normalizeText(currentPokemon.name);
+            
+            if (userAnswer === '') {
+                alert('N\'oublie pas d\'écrire le nom du Pokémon ! 😊');
+                return;
+            }
+            
+            attempts++;
+            
+            if (userAnswer === correctAnswer) {
+                // ✅ BONNE RÉPONSE
+                total++;
+                score++;
+                
+                // 🎵 Jouer le cri du Pokémon !
+                playPokemonCry(currentPokemon.num);
+                
+                // Vérifier si c'est un nouveau Pokémon
+                const isNew = currentPlayer && playerData[currentPlayer] 
+                    ? !playerData[currentPlayer].collection.includes(currentPokemon.num)
+                    : true;
+                
+                // ✨ Ajouter à la collection !
+                addToCollection(currentPokemon.num);
+                
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <span class="feedback-icon">🎉</span>
+                    <strong>Bravo !</strong> C'est bien <strong>${currentPokemon.name}</strong> !
+                    ${attempts === 1 ? ' <strong>Du premier coup !</strong> 🌟' : ''}
+                    ${isNew ? '<br><strong style="color: #48BB78;">✨ NOUVEAU dans ta collection !</strong>' : ''}
+                    <br>
+                    <div style="margin-top: 15px;">
+                        ${currentPokemon.types.map(type => 
+                            `<span class="type-badge type-${type}">${type}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                updateStats();
+                
+                setTimeout(() => {
+                    if (nextPokemon()) {
+                        displayNewPokemon();
+                    }
+                }, 2500);
+                
+            } else if (attempts < maxAttempts) {
+                // ❌ MAUVAISE RÉPONSE - MAIS IL RESTE UN ESSAI
+                
+                // Mettre à jour l'indicateur visuel
+                const attempt1 = document.getElementById('attempt1');
+                if (attempt1) {
+                    attempt1.classList.remove('active');
+                    attempt1.classList.add('used');
+                }
+                
+                const attempt2 = document.getElementById('attempt2');
+                if (attempt2) {
+                    attempt2.classList.add('last');
+                }
+                
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <span class="feedback-icon">🤔</span>
+                    <strong>Pas tout à fait...</strong><br>
+                    <strong style="font-size: 1.2em; color: #FF6B6B;">⚠️ Dernier essai !</strong><br>
+                    <span style="font-size: 0.95em;">Regarde bien l'image et réessaie !</span>
+                `;
+                
+                // Vider le champ mais garder le focus
+                pokemonInput.value = '';
+                pokemonInput.focus();
+                
+            } else {
+                // ❌ MAUVAISE RÉPONSE - PLUS D'ESSAIS
+                total++;
+                
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <span class="feedback-icon">💪</span>
+                    <strong>C'était <strong style="color: #E85555;">${currentPokemon.name}</strong></strong><br>
+                    <span style="font-size: 0.9em;">Continue, tu feras mieux au prochain !</span>
+                    <div style="margin-top: 15px;">
+                        ${currentPokemon.types.map(type => 
+                            `<span class="type-badge type-${type}">${type}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                updateStats();
+                
+                setTimeout(() => {
+                    if (nextPokemon()) {
+                        displayNewPokemon();
+                    }
+                }, 3000);
+            }
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+            document.getElementById('percentage').textContent = percentage + '%';
+        }
+
+        // Démarrer le quiz
+        startBtn.addEventListener('click', () => {
+            // Vérifier qu'un joueur est sélectionné
+            if (!currentPlayer) {
+                alert('⚠️ Tu dois d\'abord entrer ton nom de joueur !\n\nClique sur "Changer de joueur" pour choisir ou créer ton profil. 😊');
+                return;
+            }
+            
+            if (!filterPokemon()) {
+                return;
+            }
+            
+            if (!prepareGame()) {
+                return;
+            }
+            
+            // Réinitialiser le système de passes
+            skipsUsed = 0;
+            skipBtn.textContent = '➡️ Passer (2 restants)';
+            skipBtn.style.opacity = '1';
+            skipBtn.style.cursor = 'pointer';
+            
+            // Lancer la musique selon les générations sélectionnées
+            const selectedGens = getSelectedGenerations();
+            playBackgroundMusic(selectedGens);
+            
+            // Passer à l'écran de jeu
+            configScreen.classList.add('hidden');
+            gameScreen.classList.add('active');
+            helpButton.classList.add('show');
+            
+            displayNewPokemon();
+            updateStats();
+        });
+
+        // Valider
+        validateBtn.addEventListener('click', validateAnswer);
+
+        // Touche Entrée pour valider
+        pokemonInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !pokemonInput.disabled) {
+                validateAnswer();
+            }
+        });
+
+        // Passer
+        skipBtn.addEventListener('click', () => {
+            if (!currentPokemon) return;
+            
+            // Vérifier si on a déjà utilisé le maximum de passes
+            if (skipsUsed >= maxSkips) {
+                alert('⛔ Tu as déjà utilisé tes 2 passes pour cette partie !\n\nTu dois essayer de deviner ce Pokémon. 💪');
+                return;
+            }
+            
+            // Incrémenter le compteur de passes
+            skipsUsed++;
+            
+            // Ne pas compter dans les stats (pas de total++, pas de score++)
+            feedback.className = 'feedback incorrect';
+            feedback.innerHTML = `
+                <span class="feedback-icon">⏭️</span>
+                <strong>Passé !</strong> C'était <strong>${currentPokemon.name}</strong><br>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    Passes restants : <strong>${maxSkips - skipsUsed}/2</strong>
+                </div>
+                <div style="margin-top: 15px;">
+                    ${currentPokemon.types.map(type => 
+                        `<span class="type-badge type-${type}">${type}</span>`
+                    ).join('')}
+                </div>
+            `;
+            
+            // Mettre à jour le texte du bouton si c'était le dernier passe
+            if (skipsUsed >= maxSkips) {
+                skipBtn.textContent = '🚫 Plus de passes';
+                skipBtn.style.opacity = '0.5';
+                skipBtn.style.cursor = 'not-allowed';
+            } else {
+                skipBtn.textContent = `➡️ Passer (${maxSkips - skipsUsed} restant${maxSkips - skipsUsed > 1 ? 's' : ''})`;
+            }
+            
+            // Pas de updateStats() car on n'a pas essayé
+            
+            setTimeout(() => {
+                if (nextPokemon()) {
+                    displayNewPokemon();
+                }
+            }, 2000);
+        });
+
+        // Réinitialiser / Retour menu
+        resetBtn.addEventListener('click', () => {
+            // Arrêter la musique
+            stopBackgroundMusic();
+            currentMusicGen = null;
+            currentSelectedGens = null;
+            
+            // Retour à l'écran de config (pas de sélection joueur)
+            gameScreen.classList.remove('active');
+            configScreen.classList.remove('hidden');
+            helpButton.classList.remove('show');
+            
+            // Reset des stats de la partie
+            score = 0;
+            total = 0;
+            currentPokemon = null;
+            currentPokemonIndex = 0;
+            gamePokemonList = [];
+            filteredPokemon = [];
+            skipsUsed = 0;
+            updateStats();
+            feedback.style.display = 'none';
+            pokemonInput.value = '';
+            pokemonInput.disabled = false; // S'assurer que l'input est réactivé
+        });
+
+        // Supprimer les anciens event listeners sur les filtres
+        // (plus nécessaires car on configure avant de jouer)
+    </script>
+</body>
+</html>
