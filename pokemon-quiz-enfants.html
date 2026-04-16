@@ -1588,11 +1588,11 @@
                     ? selectedGens 
                     : [1, 2, 3, 4, 5];
                 const randomGen = gensToChoose[Math.floor(Math.random() * gensToChoose.length)];
-                musicFile = `pokemon-music/gen${randomGen}.mp3`;
+                musicFile = `./pokemon-music/gen${randomGen}.mp3`;
                 currentMusicGen = 'multiple';
             } else {
                 // Une seule génération
-                musicFile = `pokemon-music/gen${selectedGens[0]}.mp3`;
+                musicFile = `./pokemon-music/gen${selectedGens[0]}.mp3`;
                 currentMusicGen = selectedGens[0];
             }
             
@@ -1814,7 +1814,7 @@
                 
                 card.innerHTML = `
                     <div class="badge-image-container">
-                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
                         ${medal ? `<div class="badge-medal">${medal}</div>` : ''}
                     </div>
                     <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
@@ -1860,7 +1860,7 @@
                 
                 card.innerHTML = `
                     <div class="badge-image-container">
-                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
                     </div>
                     <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
                     <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
@@ -1905,7 +1905,7 @@
                 
                 card.innerHTML = `
                     <div class="badge-image-container">
-                        <img src="pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
                     </div>
                     <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
                     <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
@@ -2526,7 +2526,7 @@
 
         // Fonction pour obtenir le chemin de l'image locale
         function getPokemonImagePath(num) {
-            return `pokemon-images/${num}.png`;
+            return `./pokemon-images/${num}.png`;
         }
 
         // Vérifier si une image existe
@@ -2802,7 +2802,7 @@
                 }
                 
                 const format = formats[index];
-                const audioPath = `pokemon-cries/${pokemonNum}.${format}`;
+                const audioPath = `./pokemon-cries/${pokemonNum}.${format}`;
                 const audio = new Audio(audioPath);
                 
                 audio.onloadeddata = () => {
