@@ -2439,10 +2439,6 @@
                             <div class="pokemon-number">#${String(pokemon.num).padStart(3, '0')}</div>
                             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png" 
                                  alt="${pokemon.name}">
-                            <div class="pokemon-name">${pokemon.name}</div>
-                            <div class="pokemon-types">
-                                ${pokemon.types.map(type => `<span class="type-badge type-${type}">${type}</span>`).join('')}
-                            </div>
                         </div>
                     `;
                 }
