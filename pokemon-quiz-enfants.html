@@ -2320,42 +2320,158 @@
         function loadBadgesInTab() {
             const panel = document.getElementById('panel-badges');
             
-            if (!currentPlayer) {
+            if (!currentPlayer || !playerData[currentPlayer]) {
                 panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucun joueur sélectionné</div>';
                 return;
             }
             
-            const data = playerData[currentPlayer];
-            if (!data) {
-                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucune donnée disponible</div>';
+            const player = playerData[currentPlayer];
+            
+            // Calculer les badges obtenus (TOUS types confondus)
+            const badges = calculatePlayerBadges(currentPlayer);
+            
+            if (!badges || Object.keys(badges).length === 0) {
+                panel.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Aucun badge disponible</div>';
                 return;
             }
             
-            // Créer le HTML des badges
-            let html = `
+            let badgesGrid = '';
+            
+            // Ordre des 18 types
+            const allTypesOrder = [
+                'eau', 'normal', 'vol', 'plante', 'psy', 'insecte', 
+                'sol', 'poison', 'feu', 'roche', 'combat', 'électrik', 
+                'ténèbres', 'acier', 'dragon', 'glace', 'spectre', 'fée'
+            ];
+            
+            let earnedCount = 0;
+            
+            // Titre pour les badges de captures (types)
+            badgesGrid += '<h3 style="grid-column: 1 / -1; text-align: center; color: #4ECDC4; margin: 10px 0 20px; font-size: 1.5em;">🎯 Badges Captures</h3>';
+            
+            // Badges de types
+            allTypesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Compter comme "obtenu" si au moins visible (25%)
+                if (level) earnedCount++;
+                
+                // Médaille selon le niveau et les pourcentages
+                let medal = '';
+                if (percentage >= 100) {
+                    medal = ''; // Pas de médaille à 100%
+                } else if (level === 'gold' || percentage >= 75) {
+                    medal = '🥇'; // Or pour 75-99%
+                } else if (level === 'silver' || percentage >= 50) {
+                    medal = '🥈'; // Argent pour 50-74%
+                } else if (level === 'bronze' || level === 'visible' || percentage >= 25) {
+                    medal = '🥉'; // Bronze pour 25-49%
+                }
+                
+                // Badge "earned" (non grisé) UNIQUEMENT si 100%
+                const isComplete = percentage == 100;
+                const earnedClass = isComplete ? 'earned' : '';
+                
+                const badgeFileName = type + '.png';
+                
+                badgesGrid += `
+                    <div class="badge-card ${earnedClass}">
+                        <div class="badge-image-container">
+                            <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                            ${medal ? `<div class="badge-medal">${medal}</div>` : ''}
+                        </div>
+                        <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                        <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                        <div class="badge-bar">
+                            <div class="badge-bar-fill ${level || ''}" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Titre pour les badges spéciaux
+            badgesGrid += '<h3 style="grid-column: 1 / -1; text-align: center; color: #FF6B9D; margin: 30px 0 10px; font-size: 1.5em;">✨ Badges Spéciaux</h3>';
+            
+            // Afficher les badges spéciaux
+            const specialBadgesOrder = ['starter', 'évoli', 'fossile', 'bébé', 'fabuleux', 'légendaire'];
+            
+            specialBadgesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Compter comme "obtenu" seulement si 100%
+                if (level === 'gold') earnedCount++;
+                
+                const earnedClass = level === 'gold' ? 'earned' : '';
+                const badgeFileName = type + '.png';
+                
+                badgesGrid += `
+                    <div class="badge-card ${earnedClass}">
+                        <div class="badge-image-container">
+                            <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        </div>
+                        <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                        <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                        <div class="badge-bar">
+                            <div class="badge-bar-fill ${level === 'gold' ? 'gold' : ''}" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Titre pour les badges dresseurs
+            badgesGrid += '<h3 style="grid-column: 1 / -1; text-align: center; color: #FFA500; margin: 30px 0 10px; font-size: 1.5em;">👤 Badges Dresseurs</h3>';
+            
+            // Afficher les badges dresseurs
+            const trainerBadgesOrder = ['sacha', 'ondine', 'pierre', 'jessie', 'james', 'rival'];
+            
+            trainerBadgesOrder.forEach(type => {
+                if (!badges[type]) return;
+                
+                const badge = badges[type];
+                const level = badge.level;
+                const percentage = (badge.captured / badge.total * 100).toFixed(0);
+                
+                // Pour les badges dresseurs : seulement "earned" si 100%
+                if (level === 'gold') earnedCount++;
+                
+                const earnedClass = level === 'gold' ? 'earned' : '';
+                const badgeFileName = type + '.png';
+                
+                badgesGrid += `
+                    <div class="badge-card ${earnedClass}">
+                        <div class="badge-image-container">
+                            <img src="./pokemon-badges/${badgeFileName}" class="badge-image" alt="${type}">
+                        </div>
+                        <div class="badge-name">Badge ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                        <div class="badge-progress">${badge.captured}/${badge.total} (${percentage}%)</div>
+                        <div class="badge-bar">
+                            <div class="badge-bar-fill ${level === 'gold' ? 'gold' : ''}" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Assembler le HTML final
+            const html = `
                 <div class="badges-header">
-                    <h2>🏆 Mes Badges</h2>
+                    <h2>🏆 Badges de ${currentPlayer}</h2>
                     <div style="font-size: 1.2em; margin-top: 10px;">
-                        <strong>${data.badges.length}</strong> / ${allBadges.length} badges obtenus
+                        <strong>${earnedCount}</strong> badges obtenus (visibles ou plus)
                     </div>
                 </div>
                 <div class="badges-grid">
+                    ${badgesGrid}
+                </div>
             `;
             
-            for (const badgeDef of allBadges) {
-                const isEarned = data.badges.includes(badgeDef.id);
-                const badgeClass = isEarned ? 'badge-card earned' : 'badge-card locked';
-                
-                html += `
-                    <div class="${badgeClass}">
-                        <div class="badge-icon">${badgeDef.icon}</div>
-                        <div class="badge-name">${badgeDef.name}</div>
-                        <div class="badge-description">${badgeDef.description}</div>
-                    </div>
-                `;
-            }
-            
-            html += '</div>';
             panel.innerHTML = html;
         }
         
