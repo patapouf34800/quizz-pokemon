@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quiz Pokémon pour enfants - Apprends à reconnaître les Pokémon Gen 1-5 !">
+    <meta name="theme-color" content="#4ECDC4">
+    
+    <!-- PWA Meta tags -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Quiz Pokémon">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
+    <title>Quiz Pokémon pour Enfants</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .pokeball {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        p {
+            color: #555;
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(78, 205, 196, 0.5);
+        }
+        
+        .start-button:active {
+            transform: translateY(0);
+        }
+        
+        .features {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .features h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 10px 0;
+            color: #555;
+            font-size: 1.1em;
+        }
+        
+        .features li:before {
+            content: "✓ ";
+            color: #4ECDC4;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        
+        .update-notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4ECDC4;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .update-notification button {
+            background: white;
+            color: #4ECDC4;
+            border: none;
+            padding: 8px 20px;
+            margin-left: 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4ECDC4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .start-button {
+                padding: 15px 40px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pokeball">⚾</div>
+        <h1>Quiz Pokémon</h1>
+        <p>Apprends à reconnaître les 649 Pokémon de la Gen 1 à 5 !</p>
+        
+        <div class="features">
+            <h2>🎮 Fonctionnalités :</h2>
+            <ul>
+                <li>649 Pokémon à découvrir</li>
+                <li>30 badges à collectionner</li>
+                <li>Pokédex interactif</li>
+                <li>Statistiques de progression</li>
+                <li>Musiques et cris des Pokémon</li>
+                <li>Fonctionne hors ligne !</li>
+            </ul>
+        </div>
+        
+        <div class="loader" id="loader"></div>
+        
+        <button class="start-button" id="startButton" onclick="startGame()">
+            🚀 Commencer l'aventure !
+        </button>
+        
+        <p style="margin-top: 20px; font-size: 0.9em; color: #999;">
+            💾 L'application se télécharge en arrière-plan pour fonctionner hors ligne
+        </p>
+    </div>
+    
+    <div class="update-notification" id="updateNotification">
+        <span>🎉 Nouvelle version disponible !</span>
+        <button onclick="updateApp()">Mettre à jour</button>
+    </div>
+    
+    <script>
+        // Enregistrer le Service Worker
+        let newWorker;
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                        
+                        // Vérifier les mises à jour
+                        registration.addEventListener('updatefound', () => {
+                            newWorker = registration.installing;
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nouvelle version disponible
+                                    document.getElementById('updateNotification').style.display = 'block';
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Erreur Service Worker:', error);
+                    });
+                
+                // Recharger si le SW est mis à jour
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+        
+        // Fonction pour démarrer le jeu
+        function startGame() {
+            const loader = document.getElementById('loader');
+            const button = document.getElementById('startButton');
+            
+            loader.style.display = 'block';
+            button.style.display = 'none';
+            
+            // Rediriger vers le jeu
+            setTimeout(() => {
+                window.location.href = './pokemon-quiz-enfants.html';
+            }, 500);
+        }
+        
+        // Fonction pour mettre à jour l'app
+        function updateApp() {
+            if (newWorker) {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+        }
+        
+        // Demander l'installation de l'app
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher un bouton d'installation après 3 secondes
+            setTimeout(() => {
+                const installHint = document.createElement('p');
+                installHint.innerHTML = '💡 <strong>Astuce :</strong> Installe l\'app sur ton appareil pour y accéder plus facilement !';
+                installHint.style.cssText = 'margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px; color: #856404; cursor: pointer;';
+                installHint.onclick = () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('✅ App installée');
+                        }
+                        deferredPrompt = null;
+                        installHint.remove();
+                    });
+                };
+                document.querySelector('.container').appendChild(installHint);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
