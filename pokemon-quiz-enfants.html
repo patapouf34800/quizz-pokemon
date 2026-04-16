@@ -990,7 +990,7 @@
 
         .pokemon-card-badge-detail {
             background: white;
-            border: 4px solid #4ECDC4;
+            border: 4px solid #d0d0d0;
             border-radius: 20px;
             padding: 15px;
             text-align: center;
@@ -1000,6 +1000,11 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+        }
+
+        .pokemon-card-badge-detail.captured {
+            border-color: #4ECDC4;
+            background: white;
         }
 
         .pokemon-card-badge-detail:hover {
@@ -2546,15 +2551,25 @@
             let html = '';
             pokemonList.forEach(pokemon => {
                 const isCaptured = collection.includes(pokemon.num);
-                const cardClass = isCaptured ? 'pokemon-card-badge-detail' : 'pokemon-card-badge-detail silhouette';
                 const imgPath = `./pokemon-images/${pokemon.num}.png`;
                 
-                html += `
-                    <div class="${cardClass}">
-                        <div class="number">#${pokemon.num.toString().padStart(3, '0')}</div>
-                        <img src="${imgPath}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png'">
-                    </div>
-                `;
+                if (isCaptured) {
+                    // Pokémon capturé : en couleur avec bordure cyan
+                    html += `
+                        <div class="pokemon-card-badge-detail captured">
+                            <div class="number">#${pokemon.num.toString().padStart(3, '0')}</div>
+                            <img src="${imgPath}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png'">
+                        </div>
+                    `;
+                } else {
+                    // Pokémon non capturé : en silhouette grise
+                    html += `
+                        <div class="pokemon-card-badge-detail silhouette">
+                            <div class="number">#${pokemon.num.toString().padStart(3, '0')}</div>
+                            <img src="${imgPath}" alt="???" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png'">
+                        </div>
+                    `;
+                }
             });
             
             detailGrid.innerHTML = html;
