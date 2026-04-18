@@ -4020,13 +4020,13 @@
                         
                         // Nouveau : pré-chargement terminé
                         if (event.data && event.data.type === 'PRELOAD_COMPLETE') {
-                            const { imagesLoaded, criesLoaded } = event.data.stats;
+                            const { imagesLoaded, criesLoaded, musicLoaded } = event.data.stats;
                             
                             const toast = document.getElementById('preloadToast');
                             const status = document.getElementById('preloadStatus');
                             const progressBar = document.getElementById('preloadProgressBar');
                             
-                            status.innerHTML = `✅ Terminé ! ${imagesLoaded} images + ${criesLoaded} cris en cache`;
+                            status.innerHTML = `✅ Terminé ! ${imagesLoaded} images + ${criesLoaded} cris + ${musicLoaded || 0} musiques`;
                             progressBar.style.width = '100%';
                             progressBar.style.background = '#48BB78';
                             

@@ -127,11 +127,11 @@ async function preloadAllPokemon() {
                     return false;
                 });
             
-            // Charger le cri
-            const cryPromise = fetch(`./pokemon-cries/${num}.mp3`)
+            // Charger le cri (format .ogg, pas .mp3)
+            const cryPromise = fetch(`./pokemon-cries/${num}.ogg`)
                 .then(response => {
                     if (response.ok) {
-                        audioCache.put(`./pokemon-cries/${num}.mp3`, response.clone());
+                        audioCache.put(`./pokemon-cries/${num}.ogg`, response.clone());
                         criesLoaded++;
                         return true;
                     }
@@ -169,9 +169,32 @@ async function preloadAllPokemon() {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    console.log('[ServiceWorker] ✅ Pré-chargement terminé !');
+    console.log('[ServiceWorker] ✅ Pré-chargement des Pokémon terminé !');
     console.log(`[ServiceWorker] 📸 Images: ${imagesLoaded} chargées, ${imagesFailed} échecs`);
     console.log(`[ServiceWorker] 🔊 Cris: ${criesLoaded} chargés, ${criesFailed} échecs`);
+    
+    // Pré-charger les musiques de fond (gen1.mp3 à gen5.mp3)
+    console.log('[ServiceWorker] 🎵 Pré-chargement des musiques...');
+    let musicLoaded = 0;
+    let musicFailed = 0;
+    
+    for (let gen = 1; gen <= 5; gen++) {
+        try {
+            const response = await fetch(`./pokemon-music/gen${gen}.mp3`);
+            if (response.ok) {
+                await audioCache.put(`./pokemon-music/gen${gen}.mp3`, response);
+                musicLoaded++;
+                console.log(`[ServiceWorker] ✅ Musique gen${gen} chargée`);
+            } else {
+                musicFailed++;
+            }
+        } catch (error) {
+            musicFailed++;
+            console.warn(`[ServiceWorker] ⚠️ Échec musique gen${gen}`);
+        }
+    }
+    
+    console.log(`[ServiceWorker] 🎵 Musiques: ${musicLoaded} chargées, ${musicFailed} échecs`);
     
     // Notifier les clients que le pré-chargement est terminé
     const clientsFinal = await self.clients.matchAll();
@@ -182,7 +205,9 @@ async function preloadAllPokemon() {
                 imagesLoaded,
                 imagesFailed,
                 criesLoaded,
-                criesFailed
+                criesFailed,
+                musicLoaded,
+                musicFailed
             }
         });
     });
