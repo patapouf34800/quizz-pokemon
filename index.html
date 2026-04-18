@@ -2656,8 +2656,9 @@
                     html += `
                         <div class="pokemon-card-collection collected">
                             <div class="pokemon-number">#${String(pokemon.num).padStart(3, '0')}</div>
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png" 
-                                 alt="${pokemon.name}">
+                            <img src="./pokemon-images/${pokemon.num}.png" 
+                                 alt="${pokemon.name}"
+                                 onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.num}.png'">
                         </div>
                     `;
                 }
