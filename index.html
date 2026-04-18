@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quiz Pokémon interactif pour enfants avec collection de badges">
+    <meta name="theme-color" content="#6BCB77">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Pokédex Quiz">
     <title>Mon Pokédex - Quiz pour Enfants</title>
     <style>
         * {
@@ -1261,9 +1268,147 @@
             transform: scale(1.1);
             background: #FFD93D;
         }
+
+        /* Indicateur de connexion */
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .connection-status.online {
+            background: #48BB78;
+            color: white;
+        }
+
+        .connection-status.offline {
+            background: #F56565;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Notification d'installation PWA */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .install-prompt.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .install-prompt h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .install-prompt p {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .install-prompt-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .install-prompt button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', Arial;
+            transition: all 0.3s;
+        }
+
+        .install-prompt .btn-install {
+            background: #48BB78;
+            color: white;
+        }
+
+        .install-prompt .btn-install:hover {
+            background: #38A169;
+            transform: scale(1.05);
+        }
+
+        .install-prompt .btn-dismiss {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .install-prompt .btn-dismiss:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* Cache info pour le debug */
+        .cache-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.75em;
+            z-index: 9999;
+            display: none;
+        }
+
+        .cache-info.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- Indicateur de statut de connexion -->
+    <div class="connection-status online" id="connectionStatus">
+        <span>🌐</span>
+        <span id="connectionText">En ligne</span>
+    </div>
+
+    <!-- Invite d'installation PWA -->
+    <div class="install-prompt" id="installPrompt">
+        <h3>📱 Installe Mon Pokédex !</h3>
+        <p>Joue même sans Internet ! Ajoute l'app à ton écran d'accueil.</p>
+        <div class="install-prompt-buttons">
+            <button class="btn-install" id="btnInstall">Installer</button>
+            <button class="btn-dismiss" id="btnDismiss">Plus tard</button>
+        </div>
+    </div>
+
+    <!-- Info cache (debug) -->
+    <div class="cache-info" id="cacheInfo"></div>
+
     <div class="container">
         <h1>🎮 Mon Pokédex</h1>
         <p class="subtitle">Apprends à reconnaître et à écrire les Pokémon !</p>
@@ -3741,6 +3886,163 @@
                         }
                     }
                 });
+            }
+        });
+
+        // =====================================
+        // SERVICE WORKER & PWA
+        // =====================================
+        
+        // Variables globales pour le service worker
+        let deferredPrompt = null;
+        let serviceWorkerRegistration = null;
+
+        // Enregistrement du Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    serviceWorkerRegistration = await navigator.serviceWorker.register('./service-worker.js');
+                    console.log('[App] Service Worker enregistré avec succès:', serviceWorkerRegistration.scope);
+                    
+                    // Vérifier les mises à jour
+                    serviceWorkerRegistration.addEventListener('updatefound', () => {
+                        const newWorker = serviceWorkerRegistration.installing;
+                        console.log('[App] Nouvelle version du Service Worker détectée');
+                        
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Nouvelle version disponible
+                                if (confirm('🎉 Une nouvelle version du quiz est disponible !\n\nRecharger la page pour profiter des nouveautés ?')) {
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Écouter les messages du service worker
+                    navigator.serviceWorker.addEventListener('message', (event) => {
+                        if (event.data && event.data.type === 'CACHE_CLEARED') {
+                            console.log('[App]', event.data.message);
+                        }
+                        
+                        if (event.data && event.data.type === 'CACHE_STATUS') {
+                            updateCacheInfo(event.data.caches);
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('[App] Erreur lors de l\'enregistrement du Service Worker:', error);
+                }
+            });
+        }
+
+        // Gérer l'indicateur de connexion
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                connectionStatus.className = 'connection-status online';
+                connectionText.textContent = 'En ligne';
+            } else {
+                connectionStatus.className = 'connection-status offline';
+                connectionText.textContent = 'Mode hors ligne';
+            }
+        }
+
+        window.addEventListener('online', () => {
+            updateOnlineStatus();
+            console.log('[App] Connexion rétablie');
+        });
+
+        window.addEventListener('offline', () => {
+            updateOnlineStatus();
+            console.log('[App] Mode hors ligne activé');
+        });
+
+        // Initialiser le statut
+        updateOnlineStatus();
+
+        // Gérer l'invite d'installation PWA
+        const installPrompt = document.getElementById('installPrompt');
+        const btnInstall = document.getElementById('btnInstall');
+        const btnDismiss = document.getElementById('btnDismiss');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Empêcher l'affichage automatique de l'invite
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Vérifier si l'utilisateur a déjà refusé
+            const dismissed = localStorage.getItem('pwa-install-dismissed');
+            if (!dismissed) {
+                // Afficher notre propre invite personnalisée après 3 secondes
+                setTimeout(() => {
+                    installPrompt.classList.add('show');
+                }, 3000);
+            }
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            
+            // Afficher l'invite d'installation native
+            deferredPrompt.prompt();
+            
+            // Attendre le choix de l'utilisateur
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('[App] Installation PWA:', outcome);
+            
+            // Réinitialiser la variable
+            deferredPrompt = null;
+            
+            // Cacher l'invite
+            installPrompt.classList.remove('show');
+        });
+
+        btnDismiss.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+            localStorage.setItem('pwa-install-dismissed', 'true');
+        });
+
+        // Détecter si l'app est déjà installée
+        window.addEventListener('appinstalled', () => {
+            console.log('[App] PWA installée avec succès !');
+            installPrompt.classList.remove('show');
+            deferredPrompt = null;
+        });
+
+        // Fonction pour afficher les informations du cache (debug)
+        function updateCacheInfo(caches) {
+            const cacheInfo = document.getElementById('cacheInfo');
+            if (caches && caches.length > 0) {
+                const totalFiles = caches.reduce((sum, cache) => sum + cache.size, 0);
+                cacheInfo.innerHTML = `📦 Cache: ${totalFiles} fichiers`;
+                cacheInfo.classList.add('show');
+            }
+        }
+
+        // Raccourci clavier pour afficher les infos du cache (Ctrl+Shift+C)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                if (serviceWorkerRegistration && serviceWorkerRegistration.active) {
+                    serviceWorkerRegistration.active.postMessage({ type: 'GET_CACHE_STATUS' });
+                }
+            }
+            
+            // Raccourci pour vider le cache (Ctrl+Shift+D)
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                if (confirm('⚠️ Vider tout le cache ?\n\nCela supprimera tous les fichiers mis en cache et nécessitera une reconnexion Internet.')) {
+                    if (serviceWorkerRegistration && serviceWorkerRegistration.active) {
+                        serviceWorkerRegistration.active.postMessage({ type: 'CLEAR_CACHE' });
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                }
             }
         });
 
