@@ -1,6 +1,6 @@
 // Service Worker pour le Quiz Pokémon
 // Version du cache - incrémenter pour forcer une mise à jour
-const CACHE_VERSION = 'pokemon-quiz-v1.1.0';
+const CACHE_VERSION = 'pokemon-quiz-v1.2.0';
 const CACHE_NAME = `pokemon-quiz-cache-${CACHE_VERSION}`;
 
 // Caches séparés pour différents types de ressources
@@ -50,6 +50,9 @@ const BADGE_FILES = [
     './pokemon-badges/rival.png'
 ];
 
+// Nombre total de Pokémon (1-649)
+const TOTAL_POKEMON = 649;
+
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
     console.log('[ServiceWorker] Installation en cours...');
@@ -66,18 +69,124 @@ self.addEventListener('install', (event) => {
                 console.log('[ServiceWorker] Mise en cache des badges');
                 return cache.addAll(BADGE_FILES).catch(err => {
                     console.warn('[ServiceWorker] Certains badges n\'ont pas pu être mis en cache:', err);
-                    // On continue même si certains badges ne sont pas disponibles
                     return Promise.resolve();
                 });
             })
         ]).then(() => {
-            console.log('[ServiceWorker] Installation réussie');
+            console.log('[ServiceWorker] Installation réussie - Fichiers essentiels en cache');
+            console.log('[ServiceWorker] Le pré-chargement des Pokémon démarrera après activation');
             return self.skipWaiting();
         }).catch(error => {
             console.error('[ServiceWorker] Erreur lors de l\'installation:', error);
         })
     );
 });
+
+// Fonction pour pré-charger tous les Pokémon en arrière-plan
+async function preloadAllPokemon() {
+    console.log('[ServiceWorker] 🎮 Début du pré-chargement de tous les Pokémon...');
+    
+    const imageCache = await caches.open(IMAGE_CACHE);
+    const audioCache = await caches.open(AUDIO_CACHE);
+    
+    let imagesLoaded = 0;
+    let criesLoaded = 0;
+    let imagesFailed = 0;
+    let criesFailed = 0;
+    
+    // Notifier le début
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'PRELOAD_PROGRESS',
+            current: 0,
+            total: TOTAL_POKEMON * 2 // images + cris
+        });
+    });
+    
+    // Pré-charger par lots de 10 pour ne pas surcharger
+    const batchSize = 10;
+    
+    for (let i = 1; i <= TOTAL_POKEMON; i += batchSize) {
+        const batch = [];
+        
+        for (let num = i; num < i + batchSize && num <= TOTAL_POKEMON; num++) {
+            // Charger l'image
+            const imagePromise = fetch(`./pokemon-images/${num}.png`)
+                .then(response => {
+                    if (response.ok) {
+                        imageCache.put(`./pokemon-images/${num}.png`, response.clone());
+                        imagesLoaded++;
+                        return true;
+                    }
+                    imagesFailed++;
+                    return false;
+                })
+                .catch(() => {
+                    imagesFailed++;
+                    return false;
+                });
+            
+            // Charger le cri
+            const cryPromise = fetch(`./pokemon-cries/${num}.mp3`)
+                .then(response => {
+                    if (response.ok) {
+                        audioCache.put(`./pokemon-cries/${num}.mp3`, response.clone());
+                        criesLoaded++;
+                        return true;
+                    }
+                    criesFailed++;
+                    return false;
+                })
+                .catch(() => {
+                    criesFailed++;
+                    return false;
+                });
+            
+            batch.push(imagePromise, cryPromise);
+        }
+        
+        // Attendre que le lot soit terminé avant de passer au suivant
+        await Promise.all(batch);
+        
+        // Envoyer la progression tous les lots
+        const currentProgress = imagesLoaded + criesLoaded;
+        const clientsProgress = await self.clients.matchAll();
+        clientsProgress.forEach(client => {
+            client.postMessage({
+                type: 'PRELOAD_PROGRESS',
+                current: currentProgress,
+                total: TOTAL_POKEMON * 2
+            });
+        });
+        
+        // Log de progression tous les 50 Pokémon
+        if (i % 50 === 1) {
+            console.log(`[ServiceWorker] 📊 Progression: ${imagesLoaded} images, ${criesLoaded} cris en cache`);
+        }
+        
+        // Petite pause pour ne pas bloquer le navigateur
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    console.log('[ServiceWorker] ✅ Pré-chargement terminé !');
+    console.log(`[ServiceWorker] 📸 Images: ${imagesLoaded} chargées, ${imagesFailed} échecs`);
+    console.log(`[ServiceWorker] 🔊 Cris: ${criesLoaded} chargés, ${criesFailed} échecs`);
+    
+    // Notifier les clients que le pré-chargement est terminé
+    const clientsFinal = await self.clients.matchAll();
+    clientsFinal.forEach(client => {
+        client.postMessage({
+            type: 'PRELOAD_COMPLETE',
+            stats: {
+                imagesLoaded,
+                imagesFailed,
+                criesLoaded,
+                criesFailed
+            }
+        });
+    });
+}
 
 // Activation du Service Worker
 self.addEventListener('activate', (event) => {
@@ -97,6 +206,10 @@ self.addEventListener('activate', (event) => {
         }).then(() => {
             console.log('[ServiceWorker] Activation réussie');
             return self.clients.claim();
+        }).then(() => {
+            // Lancer le pré-chargement en arrière-plan APRÈS l'activation
+            console.log('[ServiceWorker] 🚀 Démarrage du pré-chargement des Pokémon...');
+            preloadAllPokemon(); // Ne pas attendre - se fait en arrière-plan
         })
     );
 });
@@ -105,26 +218,26 @@ self.addEventListener('activate', (event) => {
 function getCacheStrategy(url) {
     const pathname = new URL(url).pathname;
     
-    // Images Pokémon : Network First avec cache fallback
+    // Images Pokémon : Cache First (on les a toutes maintenant!)
     if (pathname.includes('pokemon-images/')) {
         return {
             cache: IMAGE_CACHE,
-            strategy: 'network-first',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
+            strategy: 'cache-first',
+            maxAge: 365 * 24 * 60 * 60 * 1000 // 1 an
         };
     }
     
-    // Musiques : Network First avec cache fallback
-    if (pathname.includes('pokemon-music/')) {
+    // Cris : Cache First (on les a tous maintenant!)
+    if (pathname.includes('pokemon-cries/')) {
         return {
             cache: AUDIO_CACHE,
-            strategy: 'network-first',
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 jours
+            strategy: 'cache-first',
+            maxAge: 365 * 24 * 60 * 60 * 1000 // 1 an
         };
     }
     
-    // Cris : Network First avec cache fallback
-    if (pathname.includes('pokemon-cries/')) {
+    // Musiques : Network First (optionnel, pas pré-chargé)
+    if (pathname.includes('pokemon-music/')) {
         return {
             cache: AUDIO_CACHE,
             strategy: 'network-first',

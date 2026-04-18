@@ -1387,6 +1387,69 @@
         .cache-info.show {
             display: block;
         }
+
+        /* Indicateur de pré-chargement */
+        .preload-toast {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 9998;
+            max-width: 350px;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+
+        .preload-toast.show {
+            transform: translateX(0);
+        }
+
+        .preload-toast h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .preload-toast p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .preload-progress {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .preload-progress-bar {
+            background: #48BB78;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .preload-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 5px;
+        }
+
+        .preload-close:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -1408,6 +1471,17 @@
 
     <!-- Info cache (debug) -->
     <div class="cache-info" id="cacheInfo"></div>
+
+    <!-- Toast de pré-chargement -->
+    <div class="preload-toast" id="preloadToast">
+        <button class="preload-close" onclick="document.getElementById('preloadToast').classList.remove('show')">×</button>
+        <h4>📥 Téléchargement des Pokémon...</h4>
+        <p id="preloadStatus">Préparation...</p>
+        <div class="preload-progress">
+            <div class="preload-progress-bar" id="preloadProgressBar"></div>
+        </div>
+        <p style="font-size: 0.8em; opacity: 0.7;">Tu peux continuer à jouer pendant ce temps !</p>
+    </div>
 
     <div class="container">
         <h1>🎮 Mon Pokédex</h1>
@@ -3928,6 +4002,38 @@
                         
                         if (event.data && event.data.type === 'CACHE_STATUS') {
                             updateCacheInfo(event.data.caches);
+                        }
+                        
+                        // Nouveau : message de progression du pré-chargement
+                        if (event.data && event.data.type === 'PRELOAD_PROGRESS') {
+                            const { current, total } = event.data;
+                            const percentage = Math.round((current / total) * 100);
+                            
+                            const toast = document.getElementById('preloadToast');
+                            const status = document.getElementById('preloadStatus');
+                            const progressBar = document.getElementById('preloadProgressBar');
+                            
+                            toast.classList.add('show');
+                            status.textContent = `${current} / ${total} Pokémon (${percentage}%)`;
+                            progressBar.style.width = percentage + '%';
+                        }
+                        
+                        // Nouveau : pré-chargement terminé
+                        if (event.data && event.data.type === 'PRELOAD_COMPLETE') {
+                            const { imagesLoaded, criesLoaded } = event.data.stats;
+                            
+                            const toast = document.getElementById('preloadToast');
+                            const status = document.getElementById('preloadStatus');
+                            const progressBar = document.getElementById('preloadProgressBar');
+                            
+                            status.innerHTML = `✅ Terminé ! ${imagesLoaded} images + ${criesLoaded} cris en cache`;
+                            progressBar.style.width = '100%';
+                            progressBar.style.background = '#48BB78';
+                            
+                            // Cacher automatiquement après 5 secondes
+                            setTimeout(() => {
+                                toast.classList.remove('show');
+                            }, 5000);
                         }
                     });
                     
