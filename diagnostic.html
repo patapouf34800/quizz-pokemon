@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Mode Hors Ligne - Quiz Pokémon</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', Arial, sans-serif;
+            background: linear-gradient(135deg, #FFD93D, #6BCB77);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #FF6B6B;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px #FFE66D;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .info {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+        .progress {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .cache-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .cache-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .cache-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+        }
+        .cache-card .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Mode Hors Ligne - Quiz Pokémon</h1>
+        
+        <div id="swStatus" class="status info">
+            Vérification en cours...
+        </div>
+        
+        <div id="cacheStatus" class="status info">
+            Analyse du cache...
+        </div>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+        </div>
+        
+        <div class="cache-details" id="cacheDetails"></div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="checkStatus()">🔄 Vérifier l'état</button>
+            <button onclick="viewCache()">📦 Voir le cache détaillé</button>
+            <button onclick="clearCache()">🗑️ Tout effacer</button>
+            <button onclick="window.location.href='index.html'">🎮 Retour au jeu</button>
+        </div>
+        
+        <div class="log" id="logContainer"></div>
+    </div>
+
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push({ time: timestamp, message, type });
+            updateLog();
+        }
+        
+        function updateLog() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = logs.map(entry => {
+                const color = {
+                    'info': '#0EA5E9',
+                    'success': '#10B981',
+                    'error': '#EF4444',
+                    'warning': '#F59E0B'
+                }[entry.type] || '#666';
+                return `<div class="log-entry" style="color: ${color}">[${entry.time}] ${entry.message}</div>`;
+            }).reverse().join('');
+        }
+        
+        async function checkStatus() {
+            logs = [];
+            log('🔍 Début du diagnostic...');
+            
+            // Vérifier le Service Worker
+            if ('serviceWorker' in navigator) {
+                log('✅ Service Worker supporté', 'success');
+                
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length > 0) {
+                    log(`✅ ${registrations.length} Service Worker(s) enregistré(s)`, 'success');
+                    
+                    registrations.forEach((reg, i) => {
+                        if (reg.active) {
+                            log(`✅ SW ${i+1}: Actif (${reg.active.scriptURL})`, 'success');
+                            document.getElementById('swStatus').className = 'status success';
+                            document.getElementById('swStatus').textContent = '✅ Service Worker actif - Mode hors ligne disponible !';
+                        } else if (reg.installing) {
+                            log(`⏳ SW ${i+1}: En cours d'installation...`, 'warning');
+                            document.getElementById('swStatus').className = 'status warning';
+                            document.getElementById('swStatus').textContent = '⏳ Service Worker en cours d\'installation...';
+                        }
+                    });
+                } else {
+                    log('❌ Aucun Service Worker enregistré', 'error');
+                    log('💡 Ouvre index.html d\'abord pour que le SW se lance', 'warning');
+                    document.getElementById('swStatus').className = 'status error';
+                    document.getElementById('swStatus').textContent = '❌ Service Worker non enregistré - ouvre index.html d\'abord';
+                }
+            } else {
+                log('❌ Service Worker non supporté par ce navigateur', 'error');
+                document.getElementById('swStatus').className = 'status error';
+                document.getElementById('swStatus').textContent = '❌ Service Worker non supporté par ce navigateur';
+            }
+            
+            // Vérifier le cache
+            const cacheNames = await caches.keys();
+            log(`📦 ${cacheNames.length} cache(s) trouvé(s): ${cacheNames.join(', ')}`);
+            
+            if (cacheNames.length > 0) {
+                let totalFiles = 0;
+                let staticFiles = 0;
+                let badgeFiles = 0;
+                let imageFiles = 0;
+                let audioFiles = 0;
+                
+                // Compteurs détaillés
+                const cacheStats = {
+                    static: 0,
+                    badges: 0,
+                    images: 0,
+                    audio: 0
+                };
+                
+                for (const cacheName of cacheNames) {
+                    const cache = await caches.open(cacheName);
+                    const requests = await cache.keys();
+                    totalFiles += requests.length;
+                    
+                    log(`📂 Cache "${cacheName}": ${requests.length} fichiers`);
+                    
+                    // Identifier le type de cache
+                    if (cacheName.includes('static')) {
+                        cacheStats.static = requests.length;
+                        
+                        // Vérifier les fichiers essentiels
+                        const essentials = [
+                            'index.html',
+                            'manifest.json'
+                        ];
+                        
+                        for (const file of essentials) {
+                            const matchDirect = await cache.match(`./${file}`);
+                            const matchRoot = await cache.match(`/${file}`);
+                            const matchRelative = await cache.match(file);
+                            
+                            if (matchDirect || matchRoot || matchRelative) {
+                                log(`  ✅ ${file}`, 'success');
+                            } else {
+                                log(`  ⚠️ ${file} pas encore en cache`, 'warning');
+                            }
+                        }
+                    } else if (cacheName.includes('badge')) {
+                        cacheStats.badges = requests.length;
+                        
+                        // Compter les badges
+                        const badges = requests.filter(r => r.url.includes('pokemon-badges/')).length;
+                        log(`  🏆 ${badges} badges en cache`);
+                        
+                        if (badges < 30) {
+                            log(`  ⏳ Il manque ${30 - badges} badges (ils se chargeront au fur et à mesure)`, 'info');
+                        } else {
+                            log(`  ✅ Tous les badges sont en cache !`, 'success');
+                        }
+                    } else if (cacheName.includes('image')) {
+                        cacheStats.images = requests.length;
+                        
+                        // Compter les images Pokémon
+                        const pokemonImages = requests.filter(r => r.url.includes('pokemon-images/')).length;
+                        log(`  🎨 ${pokemonImages} images Pokémon en cache`);
+                        log(`  💡 Les images se mettent en cache au fur et à mesure que tu joues`, 'info');
+                    } else if (cacheName.includes('audio')) {
+                        cacheStats.audio = requests.length;
+                        
+                        // Compter musiques et cris
+                        const music = requests.filter(r => r.url.includes('pokemon-music/')).length;
+                        const cries = requests.filter(r => r.url.includes('pokemon-cries/')).length;
+                        
+                        log(`  🎵 ${music} musiques en cache`);
+                        log(`  🔊 ${cries} cris Pokémon en cache`);
+                        log(`  💡 Les musiques et cris se mettent en cache automatiquement`, 'info');
+                    }
+                }
+                
+                // Afficher les cartes de statistiques
+                const detailsHTML = `
+                    <div class="cache-card">
+                        <h3>📄 Fichiers essentiels</h3>
+                        <div class="number">${cacheStats.static}</div>
+                    </div>
+                    <div class="cache-card">
+                        <h3>🏆 Badges</h3>
+                        <div class="number">${cacheStats.badges}/30</div>
+                    </div>
+                    <div class="cache-card">
+                        <h3>🎨 Images Pokémon</h3>
+                        <div class="number">${cacheStats.images}</div>
+                    </div>
+                    <div class="cache-card">
+                        <h3>🎵 Audio (musique + cris)</h3>
+                        <div class="number">${cacheStats.audio}</div>
+                    </div>
+                `;
+                document.getElementById('cacheDetails').innerHTML = detailsHTML;
+                
+                // Mise à jour du statut global
+                const expectedMinimum = 3; // index.html, manifest.json, service-worker (ref dans index)
+                const percentage = cacheStats.static >= expectedMinimum ? 100 : Math.round((cacheStats.static / expectedMinimum) * 100);
+                
+                document.getElementById('progressBar').style.width = percentage + '%';
+                document.getElementById('progressBar').textContent = percentage + '%';
+                
+                if (cacheStats.static >= expectedMinimum) {
+                    document.getElementById('cacheStatus').className = 'status success';
+                    document.getElementById('cacheStatus').textContent = `✅ ${totalFiles} fichiers en cache - Mode hors ligne prêt !`;
+                    log('🎉 FICHIERS ESSENTIELS EN CACHE ! Tu peux jouer hors ligne !', 'success');
+                    log('💡 Les images et sons se chargeront au fur et à mesure que tu joues', 'info');
+                } else {
+                    document.getElementById('cacheStatus').className = 'status warning';
+                    document.getElementById('cacheStatus').textContent = `⏳ ${totalFiles} fichiers en cache - Attends quelques secondes...`;
+                    log(`⏳ Cache en cours de création...`, 'warning');
+                    log('💡 Attends quelques secondes et re-vérifie', 'info');
+                }
+                
+                // Estimation taille
+                if (navigator.storage && navigator.storage.estimate) {
+                    const estimate = await navigator.storage.estimate();
+                    const usageMB = (estimate.usage / 1024 / 1024).toFixed(2);
+                    const quotaMB = (estimate.quota / 1024 / 1024).toFixed(2);
+                    const percentUsed = ((estimate.usage / estimate.quota) * 100).toFixed(1);
+                    log(`💾 Stockage: ${usageMB} MB utilisés sur ${quotaMB} MB disponibles (${percentUsed}%)`);
+                }
+            } else {
+                document.getElementById('cacheStatus').className = 'status error';
+                document.getElementById('cacheStatus').textContent = '❌ Aucun cache trouvé';
+                document.getElementById('cacheDetails').innerHTML = `
+                    <div class="cache-card">
+                        <h3>⚠️ Pas de cache</h3>
+                        <div class="number">0</div>
+                    </div>
+                `;
+                log('❌ Aucun fichier en cache', 'error');
+                log('💡 Ouvre index.html d\'abord pour que le cache se crée', 'info');
+            }
+            
+            // État réseau
+            if (navigator.onLine) {
+                log('🌐 État réseau: EN LIGNE ✅', 'success');
+            } else {
+                log('📡 État réseau: HORS LIGNE 🔌', 'warning');
+                log('💡 Tu peux quand même jouer avec les Pokémon déjà mis en cache !', 'info');
+            }
+            
+            log('✅ Diagnostic terminé');
+        }
+        
+        async function viewCache() {
+            log('📦 Listage détaillé des fichiers en cache...');
+            const cacheNames = await caches.keys();
+            
+            for (const cacheName of cacheNames) {
+                const cache = await caches.open(cacheName);
+                const requests = await cache.keys();
+                
+                log(`\n=== Cache: ${cacheName} (${requests.length} fichiers) ===`);
+                
+                // Grouper par type
+                const grouped = {
+                    html: [],
+                    badges: [],
+                    images: [],
+                    music: [],
+                    cries: [],
+                    other: []
+                };
+                
+                requests.forEach(request => {
+                    const url = new URL(request.url);
+                    const path = url.pathname;
+                    
+                    if (path.includes('.html')) grouped.html.push(path);
+                    else if (path.includes('pokemon-badges/')) grouped.badges.push(path);
+                    else if (path.includes('pokemon-images/')) grouped.images.push(path);
+                    else if (path.includes('pokemon-music/')) grouped.music.push(path);
+                    else if (path.includes('pokemon-cries/')) grouped.cries.push(path);
+                    else grouped.other.push(path);
+                });
+                
+                if (grouped.html.length > 0) {
+                    log(`  📄 HTML/JSON (${grouped.html.length}):`, 'info');
+                    grouped.html.forEach(p => log(`    • ${p}`, 'info'));
+                }
+                
+                if (grouped.badges.length > 0) {
+                    log(`  🏆 Badges (${grouped.badges.length}):`, 'info');
+                    grouped.badges.slice(0, 5).forEach(p => log(`    • ${p}`, 'info'));
+                    if (grouped.badges.length > 5) {
+                        log(`    ... et ${grouped.badges.length - 5} autres badges`, 'info');
+                    }
+                }
+                
+                if (grouped.images.length > 0) {
+                    log(`  🎨 Images Pokémon (${grouped.images.length}):`, 'info');
+                    grouped.images.slice(0, 5).forEach(p => log(`    • ${p}`, 'info'));
+                    if (grouped.images.length > 5) {
+                        log(`    ... et ${grouped.images.length - 5} autres images`, 'info');
+                    }
+                }
+                
+                if (grouped.music.length > 0) {
+                    log(`  🎵 Musiques (${grouped.music.length}):`, 'info');
+                    grouped.music.forEach(p => log(`    • ${p}`, 'info'));
+                }
+                
+                if (grouped.cries.length > 0) {
+                    log(`  🔊 Cris (${grouped.cries.length}):`, 'info');
+                    grouped.cries.slice(0, 5).forEach(p => log(`    • ${p}`, 'info'));
+                    if (grouped.cries.length > 5) {
+                        log(`    ... et ${grouped.cries.length - 5} autres cris`, 'info');
+                    }
+                }
+                
+                if (grouped.other.length > 0) {
+                    log(`  📦 Autres (${grouped.other.length}):`, 'info');
+                    grouped.other.forEach(p => log(`    • ${p}`, 'info'));
+                }
+            }
+        }
+        
+        async function clearCache() {
+            if (!confirm('⚠️ Supprimer TOUT le cache ?\n\nCela va :\n- Supprimer tous les fichiers en cache\n- Désactiver le mode hors ligne\n- Nécessiter une reconnexion Internet\n\nContinuer ?')) {
+                return;
+            }
+            
+            log('🗑️ Suppression du cache en cours...');
+            
+            // Supprimer les caches
+            const cacheNames = await caches.keys();
+            for (const name of cacheNames) {
+                await caches.delete(name);
+                log(`✅ Cache "${name}" supprimé`, 'success');
+            }
+            
+            // Désinscrire les Service Workers
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+                log('✅ Service Worker désinscrit', 'success');
+            }
+            
+            log('✅ Tout nettoyé ! Recharge la page pour recommencer.', 'success');
+            
+            document.getElementById('swStatus').className = 'status warning';
+            document.getElementById('swStatus').textContent = '⚠️ Cache vidé - rechargez la page';
+            document.getElementById('cacheStatus').className = 'status warning';
+            document.getElementById('cacheStatus').textContent = '⚠️ Cache vidé - rechargez la page';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressBar').textContent = '0%';
+            document.getElementById('cacheDetails').innerHTML = `
+                <div class="cache-card">
+                    <h3>🗑️ Cache vidé</h3>
+                    <div class="number">0</div>
+                </div>
+            `;
+        }
+        
+        // Lancer le diagnostic au chargement
+        window.addEventListener('load', checkStatus);
+        
+        // Rafraîchir automatiquement toutes les 10 secondes si cache incomplet
+        setInterval(async () => {
+            const cacheNames = await caches.keys();
+            if (cacheNames.length > 0) {
+                let hasStatic = false;
+                
+                for (const cacheName of cacheNames) {
+                    if (cacheName.includes('static')) {
+                        hasStatic = true;
+                        const cache = await caches.open(cacheName);
+                        const requests = await cache.keys();
+                        
+                        // Si moins de 3 fichiers essentiels, rafraîchir
+                        if (requests.length < 3) {
+                            log('🔄 Rafraîchissement automatique...', 'info');
+                            checkStatus();
+                            break;
+                        }
+                    }
+                }
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
