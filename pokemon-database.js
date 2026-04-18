@@ -251,7 +251,7 @@ const POKEMON_DATABASE = [
     { num: 248, name: "Tyranocif", types: ["roche", "ténèbres"], gen: 2 },
     { num: 249, name: "Lugia", types: ["psy", "vol"], gen: 2, legendary: true },
     { num: 250, name: "Ho-Oh", types: ["feu", "vol"], gen: 2, legendary: true },
-    { num: 251, name: "Célébri", types: ["psy", "plante"], gen: 2, mythical: true },
+    { num: 251, name: "Celebi", types: ["psy", "plante"], gen: 2, mythical: true },
     { num: 252, name: "Arcko", types: ["plante"], gen: 3 },
     { num: 253, name: "Massko", types: ["plante"], gen: 3 },
     { num: 254, name: "Jungko", types: ["plante"], gen: 3 },
