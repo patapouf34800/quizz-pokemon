@@ -221,8 +221,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    // Supprimer les anciens caches qui ne correspondent pas à la version actuelle
-                    if (!cacheName.includes(CACHE_VERSION)) {
+                    // Supprimer UNIQUEMENT les anciens caches Pokémon (qui commencent par "pokemon-quiz-cache-")
+                    if (cacheName.startsWith('pokemon-quiz-cache-') && !cacheName.includes(CACHE_VERSION)) {
                         console.log('[ServiceWorker] Suppression ancien cache:', cacheName);
                         return caches.delete(cacheName);
                     }
